@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.febriaroosita.swt" >
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- To Access API -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- To retrieve the account name (email) as part of sign-in -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <!-- To retrieve OAuth 2.0 tokens or invalidate tokens to disconnect a user's Google account from an app -->
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".cobamenyanyi"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <!--<activity-->
+            <!--android:name=".SplashScreenActivity"-->
+            <!--android:label="@string/app_name" >-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.MAIN" />-->
+
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--</intent-filter>-->
+        <!--</activity>-->
+        <activity
+            android:name=".TestingActivity"
+            android:icon="@drawable/welcome"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="com.nononsenseapps.filepicker.FilePickerActivity"
+            android:label="@string/app_name"
+            android:theme="@style/FilePickerTheme" >
+            <intent-filter>
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.ipaulpro.afilechooser.FileChooserActivity"
+            android:enabled="@bool/use_activity"
+            android:exported="true"
+            android:icon="@drawable/ic_chooser"
+            android:label="@string/choose_file"
+            android:theme="@style/ChooserTheme" >
+            <intent-filter>
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.OPENABLE" />
+
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name="com.ianhanniballake.localstorage.LocalStorageProvider"
+            android:authorities="com.ianhanniballake.localstorage.documents1"
+            android:enabled="@bool/use_provider"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS" >
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
+
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name=".OpenDataLocal"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
+        </activity>
+        <activity
+            android:name=".LoginActivity"
+            android:label="@string/title_activity_login" >
+        </activity>
+        <activity
+            android:name=".GoogleDriveOpenActivity"
+            android:label="@string/title_activity_google_drive_open"
+            android:parentActivityName=".OpenDataLocal" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.febriaroosita.swt.OpenDataLocal" />
+        </activity>
+        <activity
+            android:name=".CheckDBKata"
+            android:label="@string/title_activity_check_dbkata" >
+        </activity>
+        <activity
+            android:name=".Landingpage"
+            android:label="@string/title_activity_landingpage" >
+        </activity>
+        <activity
+            android:name=".settingActivity"
+            android:label="@string/title_activity_setting" >
+        </activity>
+
+    </application>
+
+</manifest>

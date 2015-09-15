@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">iEditor</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_open_data_local">OpenDataLocal</string>
+    <string name="title_activity_testing">TestingActivity</string>
+    <string name="title_activity_splash_screen">SplashScreenActivity</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_google_drive_open">GoogleDriveOpenActivity</string>
+    <string name="title_activity_check_dbkata">CheckDBKata</string>
+    <string name="title_activity_landingpage">Landingpage</string>
+    <string name="title_activity_setting">settingActivity</string>
+    <string name="title_activity_cobamenyanyi">cobamenyanyi</string>
+</resources>
