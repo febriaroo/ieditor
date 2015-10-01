@@ -1211,7 +1211,7 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
         //allText="menyanyi";
         par=allText;
         //aaa.createParagraph;
-         CharacterRun charRun = paragraph.insertBefore("Hello World!");
+         CharacterRun charRun = paragraph.insertBefore("");
         charRun.setBold(true);
         charRun.setFontSize(32);
         OutputStream out = null;

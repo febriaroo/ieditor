@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
+import android.util.Log;
 import android.widget.EditText;
 
 import java.io.FileInputStream;
@@ -348,6 +349,18 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
                         status = true;
                         return status;
                     }
+                    else if (cekAkhiran3.equals("kan"))
+                    {
+                        dasar=dasar.substring(0,dasar.length()-3);
+                        if(cekKata(dasar))
+                        {
+                            status = true;
+                            return status;
+
+                        }
+
+
+                    }
                 }
                 if (cekKataku3.equals("meny")) {
                     prefix = "meny";
@@ -356,7 +369,7 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
                     if (cekKata(dasar)) {
                     //    kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
                         status = true;
-                        //return status;
+                        return status;
                     }
                 }
                 if (cekKataku3.equals("meny")) {
@@ -370,15 +383,28 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
                         return status;
                     } else {
                         //kataserapan
-                        String temp = "s".concat(dasar);
-                        if (cekKata(temp)) {
-                        //    kata.updateJumData(db,kata.getJumKata(db,temp)+1,temp);
-                            //kalau ada di db
-                            if (kata.getType(db, temp) == "v") {
-                                status = stemming(temp);
+                        char cek = dasar.charAt(0);
+                        String cekcek=dasar;
+                        if(cek == 'a' || cek == 'i' || cek == 'u' || cek == 'e' || cek == 'o' )
+                        {
+                            String temppy=DBKata.getCekKataVowel(db,cekcek);
+                            if(temppy!="")
+                            {
+                                status=true;
                                 return status;
+
+                            }
+                            String temp = "s".concat(dasar);
+                            if (cekKata(temp)) {
+                                //    kata.updateJumData(db,kata.getJumKata(db,temp)+1,temp);
+                                //kalau ada di db
+                                if (kata.getType(db, temp) == "v") {
+                                    status = stemming(temp);
+                                    return status;
+                                }
                             }
                         }
+
                     }
                 }
                 if (cekKataku.equals("men")) {
@@ -390,6 +416,11 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
                         status = false;
                         return status;
                     }
+                    else if(dasar.charAt(0)=='t')
+                    {
+                        status = false;
+                        return status;
+                    }
                     else if (cekKata(dasar)) {
                       //  kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
                         status = true;
@@ -397,18 +428,32 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
                     }
                     else
                     {
-                        String temp = "t".concat(dasar);
-                        if (cekKata(temp)) {
-                            if (kata.getType(db, temp) == "v") {
-                            //    kata.updateJumData(db,kata.getJumKata(db,temp)+1,temp);
-                                status = true;
+                        //kataserapan
+                        char cek = dasar.charAt(0);
+                        String cekcek=dasar;
+                        if(cek == 'a' || cek == 'i' || cek == 'u' || cek == 'e' || cek == 'o' )
+                        {
+                            String temppy=DBKata.getCekKataVowel(db,cekcek);
+                            if(temppy!="")
+                            {
+                                status=true;
                                 return status;
+
+                            }
+                            String temp = "t".concat(dasar);
+                            if (cekKata(temp)) {
+                                if (kata.getType(db, temp) == "v") {
+                                    //    kata.updateJumData(db,kata.getJumKata(db,temp)+1,temp);
+                                    status = true;
+                                    return status;
+                                }
+                            }
+                            else
+                            {
+                                status = stemming(temp);
                             }
                         }
-                        else
-                        {
-                            status = stemming(temp);
-                        }
+
                     }
                 }
                 if (cekKataku.equals("mem")) {
@@ -459,11 +504,12 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
                         status = true;
                         return status;
                     }
+
                 }
-                if (cekKataku.equals("peny")) {
+                if (cekKataku3.equals("peny")) {
                     pot=4;
                     prefix = "peny";
-                    dasar = kataku.substring(akhir3, len).toLowerCase();
+                    dasar = kataku.substring(pot, len).toLowerCase();
                     if (cekKata(dasar)) {
 
                         //kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
@@ -471,7 +517,22 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
                         return status;
                     } else {
                         //kataserapan
-                        String temp = "s".concat(dasar);
+                        char cek = dasar.charAt(0);
+                        String cekcek=dasar;
+                        if(cek == 'a' || cek == 'i' || cek == 'u' || cek == 'e' || cek == 'o' )
+                        {
+                            String temppy=DBKata.getCekKataVowel(db,cekcek);
+                            if(temppy!="")
+                            {
+                                status=true;
+                                return status;
+
+                            }
+
+                        }
+
+
+                        /*String temp = "s".concat(dasar);
                         if (cekKata(temp)) {
 
 //                            kata.updateJumData(db,kata.getJumKata(db,temp)+1,temp);
@@ -487,7 +548,7 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
                             {
                                 status = stemming(temp);
                             }
-                        }
+                        }*/
 
                     }
                 }
@@ -503,7 +564,7 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
                 }
                 if (cekKataku.equals("pem")) {
                     pot=3;prefix = "pem";
-                    dasar = kataku.substring(akhir3, len).toLowerCase();
+                    dasar = kataku.substring(pot, len).toLowerCase();
                     if (cekKata(dasar)) {
 
                         //kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
@@ -511,6 +572,20 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
                         return status;
                     } else {
                         //kataserapan
+                        char cek = dasar.charAt(0);
+                        String cekcek=dasar;
+                        if(cek == 'a' || cek == 'i' || cek == 'u' || cek == 'e' || cek == 'o' )
+                        {
+                            String temppy=DBKata.getCekKataVowel(db,cekcek);
+                            if(temppy!="")
+                            {
+                                status=true;
+                                return status;
+
+                            }
+
+                        }
+
                         String temp = "p".concat(dasar);
                         if (cekKata(temp)) {
                             //kalau ada di db
@@ -619,7 +694,9 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
                 if (cekAkhiran3.equals("kan")) {
 
                     dasar = kataku.substring(pot, len-3).toLowerCase();
-                    if(cekKata(dasar)) {
+                    String dasar1ku = kataku.substring(pot+1, len-2).toLowerCase();
+                    String dasar2 = kataku.substring(pot+2, len-2).toLowerCase();
+                    if(cekKata(dasar) || cekKata(dasar1ku) || cekKata(dasar2) ) {
                         if (!prefix.equals("ke") || !prefix.equals("peng")) {
 
                             //kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
@@ -642,7 +719,9 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
                 if (cekAkhiran2.equals("an")) {
 
                     dasar = kataku.substring(pot, len-2).toLowerCase();
-                    if(cekKata(dasar)) {
+                    String dasar1ku = kataku.substring(pot+1, len-2).toLowerCase();
+                    String dasar2 = kataku.substring(pot+2, len-2).toLowerCase();
+                    if(cekKata(dasar) || cekKata(dasar1ku) || cekKata(dasar2) ) {
                         if (!prefix.equals("meng") || !prefix.equals("di") || !prefix.equals("ter")) {
 
                           //  kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
@@ -665,7 +744,9 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
                 if (cekAkhiran1.equals("i")) {
 
                     dasar = kataku.substring(pot, len-1).toLowerCase();
-                    if(cekKata(dasar)) {
+                    String dasar1ku = kataku.substring(pot+1, len-2).toLowerCase();
+                    String dasar2 = kataku.substring(pot+2, len-2).toLowerCase();
+                    if(cekKata(dasar) || cekKata(dasar1ku) || cekKata(dasar2) ) {
 
                         if (!prefix.equals("ber") || !prefix.equals("ke") || !prefix.equals("peng")) {
 

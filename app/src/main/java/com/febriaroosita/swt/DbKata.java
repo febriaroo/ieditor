@@ -118,6 +118,24 @@ public class DbKata extends SQLiteOpenHelper {
 
         return "tidakada";
     }
+    public String getCekKataVowel(SQLiteDatabase db, String kata){
+        CKata data = new CKata();
+        String myKata = "%".concat("kata");
+        Cursor cursor =  db.rawQuery( "select kata from "+TABLE_NAME+" where "+COLUMNS[1]+"='"+myKata.toLowerCase()+"'", null );
+        if(cursor.moveToFirst())
+        {
+            if(cursor != null)
+                cursor.close();
+
+            //data.id_kata = cursor.getInt(0);
+            return cursor.getString(0);
+        }
+        if(cursor != null)
+            cursor.close();
+
+
+        return null;
+    }
     public int getNumberDB(SQLiteDatabase db){
         CKata data = new CKata();
 
