@@ -30,6 +30,7 @@ import android.widget.Toast;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.usermodel.CharacterRun;
 import org.apache.poi.hwpf.usermodel.Paragraph;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -196,7 +197,7 @@ public class MainActivity extends ActionBarActivity {
                             String []splitku=s.toString().split(" ");
                             //Log.i("hasilku",splitku[splitku.length-1]);
 
-                                    String kata=splitku[splitku.length - 1];
+                                    String kata=splitku[splitku.length - 1].replace("\r","");
                                 ListWords.add(splitku[splitku.length - 1]);
                                 posisi.add(s.length() - 1);
                                     SpellingWords a=new SpellingWords(MainActivity.this,1,2);
@@ -454,7 +455,8 @@ public class MainActivity extends ActionBarActivity {
 
                 if (!check.isEmpty() && check.equals("new_file")) {
                     new_file = apa.getStringExtra("namefile");
-                    filePath = "/storage/emulated/0/ieditor/" + new_file;
+                    filePath = "/storage/emulated/0/" + new_file;
+                    //filePath = "/storage/emulated/0/ieditor/" + new_file;
                     setNew_file(new_file);
                     setTitle(new_file);
                     //  setTitle(new_file);
@@ -484,9 +486,11 @@ public class MainActivity extends ActionBarActivity {
     }
     public void setNew_file(String FileName)
     {
-
-        File sdCard = Environment.getExternalStorageDirectory();
-        File dir1 = new File(sdCard.getAbsolutePath() + "/ieditor/ee.doc");
+        //Environment.get
+       // File sdCard = getBaseContext().getFilesDir();
+       File sdCard = Environment.getExternalStorageDirectory();
+        Uri url = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.ee);
+        File dir1 = new File(url.toString());
         //File dir1 = new File(sdCard.getAbsolutePath() + "/ieditor/eekk.doc");
        // File dir1 = new File(sdCard.getAbsolutePath()+"/" + "ieditor/"+FileName);
         File dir11 = new File(sdCard.getAbsolutePath() +"/" + "ieditor");
@@ -510,9 +514,13 @@ public class MainActivity extends ActionBarActivity {
 
         FileInputStream aa=null;
         try {
-            aa = new FileInputStream(dir1);
-            HWPFDocument a = new HWPFDocument(aa);
-
+            //aa = new FileInputStream(dir1);
+            InputStream kya = getResources().openRawResource(R.raw.ee);
+            //FileInputStream stream=new FileInputStream(String.valueOf(getResources().openRawResource(R.raw.ee)));
+            POIFSFileSystem fs=new POIFSFileSystem(kya);
+            //HWPFDocument a = new HWPFDocument(aa);
+            HWPFDocument a = new HWPFDocument(fs);
+           // HWPFDocument();
             Paragraph hwPar;
             org.apache.poi.hwpf.usermodel.Range range = a.getRange();
 
@@ -616,9 +624,10 @@ public class MainActivity extends ActionBarActivity {
         {
            mPart=parts[1];
         }
+        //File sdCard = Environment.getDataDirectory();
         File sdCard = Environment.getExternalStorageDirectory();
-        File dir = new File(sdCard.getAbsolutePath() + "/ieditor/ee.doc");
-        File dir11 = new File(sdCard+"/iEditor");
+        File dir = new File(sdCard.getAbsolutePath() + "/ee.doc");
+        File dir11 = new File(String.valueOf(sdCard));
         File stu= new File(sdCard.getAbsolutePath()+"/" +mPart);
         if (dir11.exists()) {
 
@@ -661,6 +670,7 @@ public class MainActivity extends ActionBarActivity {
                 e.printStackTrace();
             }
             try {
+                assert out != null;
                 out.close();
             } catch (IOException e) {
                 e.printStackTrace();

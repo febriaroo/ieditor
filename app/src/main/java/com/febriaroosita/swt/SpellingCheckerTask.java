@@ -11,10 +11,12 @@ import android.util.Log;
 import android.widget.EditText;
 
 import org.apache.poi.hwpf.HWPFDocument;
+import org.apache.poi.hwpf.usermodel.CharacterRun;
 import org.apache.poi.hwpf.usermodel.Paragraph;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -669,6 +671,7 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
         int akhir2 = 2;//untuk yang jumlahnya 3 huruf
         String dasar1;
         int akhiran1;
+        kataku=kataku.replace("\r","");
         int len = kataku.length();
 
         int pot=0;
@@ -1181,36 +1184,58 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
         Log.i("testing",parts[0]);
         //File dir = new File(sdCard.getAbsolutePath() + "/ieditor/ee.doc");
         //File dir1 = new File(sdCard.getAbsolutePath() + "/ieditor/eekk.doc");
-//        File dir1 = new File(sdCard.getAbsolutePath()+"/" + parts[1]);
-//        File dir = new File(sdCard.getAbsolutePath() +"/" + parts[1]);
+        File dir1 = new File(sdCard.getAbsolutePath()+"/" + parts[1]);
+        File dir = new File(sdCard.getAbsolutePath() +"/" + parts[1]);
         SpannableString myText = null;
-//        FileInputStream aa=null;
-        //            aa = new FileInputStream(dir);
-//            HWPFDocument a=new HWPFDocument(aa);
-//
-//            Paragraph hwPar;
-//            org.apache.poi.hwpf.usermodel.Range range = a.getRange();
-//            ;
-//            Paragraph paragraph = range.getParagraph(0);
-//           // Log.i("mytag", a.getText().toString());
-//
-//            //ini diganti sementara
-//            allText=a.getText().toString();
-        allText="menyanyi";
+        FileInputStream aa=null;
+        try {
+            aa = new FileInputStream(dir);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        HWPFDocument a= null;
+        try {
+            a = new HWPFDocument(aa);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Paragraph hwPar;
+            org.apache.poi.hwpf.usermodel.Range range = a.getRange();
+            ;
+            Paragraph paragraph = range.getParagraph(0);
+           // Log.i("mytag", a.getText().toString());
+
+            //ini diganti sementara
+            allText=a.getText().toString();
+        //allText="menyanyi";
         par=allText;
         //aaa.createParagraph;
-        // CharacterRun charRun = paragraph.insertBefore("Hello World!");
-        //charRun.setBold(true);
-        //charRun.setFontSize(32);
-//            OutputStream out = new FileOutputStream(dir1);
-//            a.write(out);
-//            out.close();
+         CharacterRun charRun = paragraph.insertBefore("Hello World!");
+        charRun.setBold(true);
+        charRun.setFontSize(32);
+        OutputStream out = null;
+        try {
+            out = new FileOutputStream(dir1);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            a.write(out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         int firstChar = 0;
         int lastChar = -1;
         boolean ketemu = true;
 
         myText = new SpannableString(allText);
-        stemming(allText);
+        //stemming(allText);
 
         while(ketemu){
             int pos=getPositionFromSeparator(firstChar);
