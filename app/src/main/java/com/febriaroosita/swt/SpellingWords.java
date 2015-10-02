@@ -456,6 +456,7 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
 
                     }
                 }
+
                 if (cekKataku.equals("mem")) {
                     prefix = "mem";
                     pot=3;
@@ -465,7 +466,21 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
                         status = true;
                         return status;
                     } else {
+
                         //kataserapan
+                        if (cekAkhiran3.equals("kan"))
+                        {
+                            dasar=dasar.substring(0,dasar.length()-3);
+                            if(cekKata(dasar))
+                            {
+                                status = true;
+                                return status;
+
+                            }
+
+
+                        }
+
                         String temp = "p".concat(dasar);
                         if (cekKata(temp)) {
                             if (kata.getType(db, temp) == "v") {
@@ -479,9 +494,13 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
                                 status = stemming(temp);
                             }
                         }
+                        else if(cekKata(dasar)) {
+
+                        }
 
                     }
                 }
+
                 if (cekKataku2.equals("me")) {
                     pot=2;
                     prefix = "me";
