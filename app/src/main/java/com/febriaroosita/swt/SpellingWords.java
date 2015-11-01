@@ -114,6 +114,259 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
 
     }
 
+
+    public boolean cekKataECSStemmer(String kataku)
+    {
+        boolean status=false;
+
+        int awal = 0;
+        int akhir1 = 3;//untuk yang jumlahnya 2 huruf
+        int akhir2 = 2;//untuk yang jumlahnya 3 huruf
+        String dasar1;
+        int akhiran1;
+        kataku=kataku.replace("\r","");
+        int len = kataku.length();
+
+        int pot=0;
+        String cekKataku = null, cekKataku2 = null,cekKataku3 = null,dasar=kataku;
+        String cekAkhiran1=null, cekAkhiran2=null, cekAkhiran3 = null;
+        String prefix="";
+        int akhir3=4;//untuk yang jumlahnya 4 huruf
+        try{
+            //cek angka atau bukan
+            Double kya = Double.parseDouble(dasar);
+            status=true;
+            return status;
+        }catch (NumberFormatException e) {
+
+            if (len > 1) {
+
+                //ambil awalan kata
+                if (len > 3) {
+
+                } else {
+                    cekKataku = kataku.toLowerCase();
+                    cekKataku2 = kataku.toLowerCase();
+
+                    cekKataku3 = kataku.toLowerCase();
+                    cekAkhiran1 = kataku.substring(len - 1, len).toLowerCase();
+                    cekAkhiran2 = kataku.substring(len - 2, len).toLowerCase();
+                    cekAkhiran3 = kataku.substring(len - 1, len).toLowerCase();
+
+                }
+                if (cekKata(kataku)) {
+
+                    kata.updateJumData(db,kata.getJumKata(db,kataku)+1,kataku);
+                    status = true;
+                }
+                else if (cekKataHistori(kataku)) {
+                    status = true;
+                }
+                else {
+
+
+                    cekAkhiran1 = kataku.substring(len - 3, len).toLowerCase();
+                    cekAkhiran2 = kataku.substring(len - 2, len).toLowerCase();
+                    cekAkhiran3 = kataku.substring(len - 1, len).toLowerCase();
+                    String simpanAkhiran ="";
+
+                    String cekAwalan2 = kataku.substring(0,2).toLowerCase();
+
+                    // cek partikel
+                    //“-lah”, “-kah”, “-tah”, dan “-pun”
+                    if(cekAkhiran1.equals("lah") || cekAkhiran1.equals("kah") || cekAkhiran1.equals("tah") || cekAkhiran1.equals("pun"))
+                    {
+                        String temp = kataku.substring(0, len-3).toLowerCase();
+                        if(cekKata(temp))
+                        {
+                            status= true;
+                        }
+                        simpanAkhiran = cekAkhiran1;
+                    }
+                    //cek Possessive Pronoun
+                    // “-ku” , “mu”, dan “-nya”
+                    else if (cekAkhiran2.equals("ku") || cekAkhiran2.equals("mu") || cekAkhiran1.equals("nya"))
+                    {
+                        if(cekAkhiran1.equals("nya")) {
+                            String temp = kataku.substring(0, len - 3).toLowerCase();
+                            if (cekKata(temp)) {
+                                status= true;
+                            }
+                            simpanAkhiran = cekAkhiran1;
+                        }
+                        else {
+                            String temp = kataku.substring(0, len - 2).toLowerCase();
+                            if (cekKata(temp)) {
+                                status= true;
+                            }
+                            simpanAkhiran = cekAkhiran2;
+                        }
+                    }
+                    // Cek Derivation Suffixes (DS)
+                    // “-i”, “-kan”, dan “-an”.
+                    else if(cekAkhiran3.equals("i") || cekAkhiran2.equals("an") || cekAkhiran1.equals("kan"))
+                    {
+                        if(cekAkhiran1.equals("kan")) {
+                            String temp = kataku.substring(0, len - 3).toLowerCase();
+                            if (cekKata(temp)) {
+                                status= true;
+                            }
+                            simpanAkhiran = cekAkhiran1;
+                        }
+                        else if (cekAkhiran2.equals("an")){
+                            String temp;
+                            temp = kataku.substring(0, len - 2).toLowerCase();
+
+                            if (cekKata(temp)) {
+                                status= true;
+                            }
+                            simpanAkhiran = cekAkhiran2;
+                        }
+                        else if (cekAkhiran3.equals("i")){
+                            String temp = kataku.substring(0, len - 1).toLowerCase();
+                            if (cekKata(temp)) {
+                                status= true;
+                            }
+                            simpanAkhiran = cekAkhiran3;
+                        }
+                    }
+
+                    else {
+
+                        //cek Derivation Prefixes (DP)
+                        //[ DP+ [ DP+ [ DP+] ] ] Kata Dasar [ [+DS] [+PP] [+P] ]
+                        //Awalan yang tidak bermorfologi (“di-”, “ke-” dan “se-”).
+
+                        boolean cekDP = true;
+                        while (cekDP) {
+                            if (cekAwalan2.equals("di") || cekAwalan2.equals("ke") || cekAwalan2.equals("se")) {
+                                if (cekKata(kataku.substring(2, (len - simpanAkhiran.length())))) {
+                                    status = true;
+                                }
+
+                            }
+                            //Awalan yang dapat bermorfologi (“me-”, “be-”,“pe-”, dan “te-”)
+                            else if (cekAwalan2.equals("me") || cekAwalan2.equals("be") || cekAwalan2.equals("pe") || cekAwalan2.equals("te")) {
+                                //TODO : kata2 yang dilarang
+
+                                //yaitu „be-i‟, „di-an‟, „ke-i‟, „ke-kan‟, „mean‟, „se-i‟, „se-kan‟, dan yang terakhir „te-an‟
+                                if (cekAwalan2.equals("be") && cekAkhiran3.equals("i")) {
+                                    status = false;
+                                } else if (cekAwalan2.equals("di") && cekAkhiran2.equals("an")) {
+                                    cekDP = false;
+                                } else if (cekAwalan2.equals("ke") && cekAkhiran2.equals("i")) {
+                                    cekDP = false;
+                                } else if (cekAwalan2.equals("me") && cekAkhiran2.equals("an")) {
+                                    cekDP = false;
+                                } else if (cekAwalan2.equals("se") && cekAkhiran3.equals("i")) {
+                                    cekDP = false;
+                                } else if (cekAwalan2.equals("se") && cekAkhiran2.equals("an")) {
+                                    cekDP = false;
+                                } else if (cekAwalan2.equals("te") && cekAkhiran2.equals("an")) {
+                                    cekDP = false;
+                                }
+
+                                if (cekAwalan2.equals("be")) {
+//                        1 berV... ber-V... | be-rV...
+                                    if (kataku.substring(0, 3).equals("ber") && (kataku.charAt(3) == 'a' || kataku.charAt(3) == 'i' || kataku.charAt(3) == 'u' || kataku.charAt(3) == 'e' || kataku.charAt(3) == 'o')) {
+                                        //cek ber-v
+                                        if (cekKata(kataku.substring(3, (len - simpanAkhiran.length())))) {
+                                            status = true;
+                                        }
+                                        //cek be-rV
+                                        else if (cekKata(kataku.substring(2, len))) {
+                                            status = true;
+                                        }
+                                    }
+//                        2 berCAP... ber-CAP... dimana C!=‟r‟ & P!=‟er‟
+                                    else if (kataku.substring(0, 3).equals("ber")) {
+                                        if ((kataku.charAt(3) != 'a' && kataku.charAt(3) != 'i' && kataku.charAt(3) != 'u' && kataku.charAt(3) != 'e' && kataku.charAt(3) != 'o')) {
+
+                                            if (kataku.charAt(3) != 'r' || !kataku.contains("er")) {
+                                                if (cekKata(kataku.substring(3, (len - simpanAkhiran.length())))) {
+                                                    status = true;
+                                                }
+
+                                            }
+//                        3 berCAerV... ber-CaerV... dimana C!=‟r‟
+                                            else if (kataku.charAt(3) != 'r' || kataku.contains("er")) {
+                                                if (cekKata(kataku.substring(3, (len - simpanAkhiran.length())))) {
+                                                    status = true;
+                                                }
+                                            }
+
+                                        }
+                                    }
+//                        4 belajar bel-ajar
+                                    else if (kataku.equals("belajar")) {
+                                        return true;
+                                    }
+//                        5 beC1erC2... be-C1erC2... dimana C1!={‟r‟|‟l‟}
+                                    else if (cekAwalan2.equals("be")) {
+                                        if (kataku.charAt(2) != 'r' || kataku.charAt(2) != 'l') {
+                                            if (cekKata(kataku.substring(2, (len - simpanAkhiran.length())))) {
+                                                status = true;
+                                            }
+
+                                        }
+                                    }
+                                }
+//                        6 terV... ter-V... | te-rV...
+                                else if(cekAwalan2.equals("te"))
+                                {
+                                    if (kataku.substring(0, 3).equals("ter") && (kataku.charAt(3) == 'a' || kataku.charAt(3) == 'i' || kataku.charAt(3) == 'u' || kataku.charAt(3) == 'e' || kataku.charAt(3) == 'o')) {
+                                        //cek ter-v
+                                        if (cekKata(kataku.substring(3, (len - simpanAkhiran.length())))) {
+                                            status = true;
+                                        }
+                                        //cek te-rV
+                                        else if (cekKata(kataku.substring(2, len))) {
+                                            status = true;
+                                        }
+                                    }
+//                        7 terCerV... ter-CerV... dimana C!=‟r‟
+                                    else if (kataku.substring(0, 3).equals("ter")) {
+                                        if ((kataku.charAt(3) != 'a' && kataku.charAt(3) != 'i' && kataku.charAt(3) != 'u' && kataku.charAt(3) != 'e' && kataku.charAt(3) != 'o')) {
+
+                                            if (kataku.charAt(3) != 'r' || kataku.contains("er")) {
+                                                if (cekKata(kataku.substring(3, (len - simpanAkhiran.length())))) {
+                                                    status = true;
+                                                }
+
+                                            }
+
+//                        8 terCP... ter-CP... dimana C!=‟r‟ dan P!=‟er‟
+                                            else if(kataku.charAt(3) != 'r' || !kataku.contains("er"))
+                                            {
+                                                if (cekKata(kataku.substring(3, (len - simpanAkhiran.length())))) {
+                                                    status = true;
+                                                }
+
+                                            }
+
+
+                                        }
+                                    }
+
+
+
+                                }
+
+//                        9 teC1erC2... te-C1erC2... dimana C1!=‟r‟
+
+
+                            }
+
+                        }
+                    }
+
+                }
+
+            }
+        }
+        return status;
+    }
+
     public boolean cekKata(String kataku) {
 //        String par = ma.getText().toString();
 //        Log.e("tess","start: "+String.valueOf(pos)+" | end : "+String.valueOf(end));
