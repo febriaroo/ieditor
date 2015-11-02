@@ -11,6 +11,8 @@ import android.widget.EditText;
 
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Febria on 5/13/2015.
@@ -26,6 +28,8 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
     private EditText ma;
     String filePath;
     int firstchar, lastchar;
+    ArrayList<removalClass> myremoval;
+
 
     // public CBudayaAdapter budayaAdapter;
 
@@ -44,6 +48,7 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
         db1 = his.getWritableDatabase();
         firstchar = first;
         lastchar = last;
+        myremoval = new ArrayList<removalClass>();
     }
 
     public int distanceKata(String kata1, String kata2) {
@@ -115,257 +120,1313 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
     }
 
 
-    public boolean cekKataECSStemmer(String kataku)
-    {
-        boolean status=false;
 
-        int awal = 0;
-        int akhir1 = 3;//untuk yang jumlahnya 2 huruf
-        int akhir2 = 2;//untuk yang jumlahnya 3 huruf
-        String dasar1;
-        int akhiran1;
-        kataku=kataku.replace("\r","");
-        int len = kataku.length();
+    private String findMatch1a(String myString) {
 
-        int pot=0;
-        String cekKataku = null, cekKataku2 = null,cekKataku3 = null,dasar=kataku;
-        String cekAkhiran1=null, cekAkhiran2=null, cekAkhiran3 = null;
-        String prefix="";
-        int akhir3=4;//untuk yang jumlahnya 4 huruf
-        try{
-            //cek angka atau bukan
-            Double kya = Double.parseDouble(dasar);
-            status=true;
-            return status;
-        }catch (NumberFormatException e) {
+        String match = "";
 
-            if (len > 1) {
+        // Pattern to find code
+        String pattern = "^ber([aiueo].*)$";  // Sequence of 8 digits'
 
-                //ambil awalan kata
-                if (len > 3) {
+        Pattern regEx = Pattern.compile(pattern);
 
-                } else {
-                    cekKataku = kataku.toLowerCase();
-                    cekKataku2 = kataku.toLowerCase();
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match = m.group(1);
+        }
+        return match;
+    }
+    private String findMatch1b(String myString) {
 
-                    cekKataku3 = kataku.toLowerCase();
-                    cekAkhiran1 = kataku.substring(len - 1, len).toLowerCase();
-                    cekAkhiran2 = kataku.substring(len - 2, len).toLowerCase();
-                    cekAkhiran3 = kataku.substring(len - 1, len).toLowerCase();
+        String match = "";
 
-                }
-                if (cekKata(kataku)) {
+        // Pattern to find code
+        String pattern = "^ber([aiueo].*)$";  // Sequence of 8 digits'
 
-                    kata.updateJumData(db,kata.getJumKata(db,kataku)+1,kataku);
-                    status = true;
-                }
-                else if (cekKataHistori(kataku)) {
-                    status = true;
-                }
-                else {
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match = "r" + m.group(1);
+        }
+        return match;
+    }
+    private String findMatch2(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^ber([bcdfghjklmnpqrstvwxyz])([a-z])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            String pattern2 = "^er(.*)$";
+            regEx = Pattern.compile(pattern2);
+            Matcher m1 =regEx.matcher(m.group(3));
+            if(!m1.find())
+            {
+                match=m.group(1)+m.group(2)+m.group(3);
+            }
+        }
+        return match;
+    }
+    private String findMatch3(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^ber([bcdfghjklmnpqrstvwxyz])([a-z])er([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            if(m.group(1)!="r")
+            {
+                match=m.group(1)+m.group(2)+"er"+m.group(3)+m.group(4);
+            }
+        }
+        return match;
+    }
+    private String findMatch4(String myString) {
+
+        String match = "";
+
+        if (myString.equals("belajar")) {
+            return "ajar";
+        }
+        return match;
+    }
+    // Rule 5 : beC1erC2 -> be-C1erC2 where C1 != 'r'
+    private String findMatch5(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^be([bcdfghjklmnpqstvwxyz])(er[bcdfghjklmnpqrstvwxyz])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2)+m.group(3);
+        }
+
+        return match;
+    }
+    private String findMatch6a(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^ter([aiueo].*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1);
+        }
+
+        return match;
+    }
+    private String findMatch6b(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^ter([aiueo].*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match="r"+m.group(1);
+        }
+
+        return match;
+    }
+
+    private String findMatch7(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^ter([bcdfghjklmnpqrstvwxyz])er([aiueo].*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            if(m.group(1)!="r")
+            {
+                match=m.group(1)+"er"+m.group(2);
+            }
+        }
+        return match;
+    }
+    private String findMatch8(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^ter([bcdfghjklmnpqrstvwxyz])([a-z])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            String pattern2 = "^er(.*)$";
+            regEx = Pattern.compile(pattern2);
+            Matcher m1 =regEx.matcher(m.group(3));
+            if(!m1.find() && m.group(1)!="r")
+            {
+                match=m.group(1)+m.group(2)+m.group(3);
+            }
+        }
+        return match;
+    }
+    private String findMatch9(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^te([bcdfghjklmnpqrstvwxyz])er([bcdfghjklmnpqrstvwxyz])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            if(m.group(1)!="r")
+            {
+                match=m.group(1)+"er"+m.group(2)+m.group(3);
+            }
+        }
+        return match;
+    }
+
+    private String findMatch10(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^me([lrwy])([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            if(m.group(1)!="r")
+            {
+                match=m.group(1)+m.group(2)+m.group(3);
+            }
+        }
+        return match;
+    }
+    //
+    private String findMatch11(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^mem([bfv])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2);
+        }
+        return match;
+    }
+    //^mempe(.*)$
+    private String findMatch12(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^mempe(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match="pe"+m.group(1);
+        }
+        return match;
+    }
+    private String findMatch13a(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "mem([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match="m"+m.group(1)+m.group(2);
+        }
+        return match;
+    }
+
+    private String findMatch13b(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^mem([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match="p"+m.group(1)+m.group(2);
+        }
+        return match;
+    }
+    //^men([cdjstz])(.*)$
+
+    private String findMatch14(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^men([cdjstz])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2);
+        }
+        return match;
+    }
+
+    private String findMatch15a(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^men([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match="n"+m.group(1)+m.group(2);
+        }
+        return match;
+    }
+    private String findMatch15b(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^men([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match="t"+m.group(1)+m.group(2);
+        }
+        return match;
+    }
+    private String findMatch16(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^meng([g|h|q|k])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2);
+        }
+        return match;
+    }
+
+    private String findMatch17a(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^meng([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2);
+        }
+        return match;
+    }
+    private String findMatch17b(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^meng([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match="k"+m.group(1)+m.group(2);
+        }
+        return match;
+    }
+    private String findMatch17c(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^menge(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1);
+        }
+        return match;
+    }
+    private String findMatch17d(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^meng([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match="ng"+m.group(1)+m.group(2);
+        }
+        return match;
+    }
+    private String findMatch18a(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^meny([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match="ny"+m.group(1)+m.group(2);
+        }
+        return match;
+    }
 
 
-                    cekAkhiran1 = kataku.substring(len - 3, len).toLowerCase();
-                    cekAkhiran2 = kataku.substring(len - 2, len).toLowerCase();
-                    cekAkhiran3 = kataku.substring(len - 1, len).toLowerCase();
-                    String simpanAkhiran ="";
+    private String findMatch18b(String myString) {
 
-                    String cekAwalan2 = kataku.substring(0,2).toLowerCase();
+        String match = "";
 
-                    // cek partikel
-                    //“-lah”, “-kah”, “-tah”, dan “-pun”
-                    if(cekAkhiran1.equals("lah") || cekAkhiran1.equals("kah") || cekAkhiran1.equals("tah") || cekAkhiran1.equals("pun"))
-                    {
-                        String temp = kataku.substring(0, len-3).toLowerCase();
-                        if(cekKata(temp))
-                        {
-                            status= true;
-                        }
-                        simpanAkhiran = cekAkhiran1;
-                    }
-                    //cek Possessive Pronoun
-                    // “-ku” , “mu”, dan “-nya”
-                    else if (cekAkhiran2.equals("ku") || cekAkhiran2.equals("mu") || cekAkhiran1.equals("nya"))
-                    {
-                        if(cekAkhiran1.equals("nya")) {
-                            String temp = kataku.substring(0, len - 3).toLowerCase();
-                            if (cekKata(temp)) {
-                                status= true;
-                            }
-                            simpanAkhiran = cekAkhiran1;
-                        }
-                        else {
-                            String temp = kataku.substring(0, len - 2).toLowerCase();
-                            if (cekKata(temp)) {
-                                status= true;
-                            }
-                            simpanAkhiran = cekAkhiran2;
-                        }
-                    }
-                    // Cek Derivation Suffixes (DS)
-                    // “-i”, “-kan”, dan “-an”.
-                    else if(cekAkhiran3.equals("i") || cekAkhiran2.equals("an") || cekAkhiran1.equals("kan"))
-                    {
-                        if(cekAkhiran1.equals("kan")) {
-                            String temp = kataku.substring(0, len - 3).toLowerCase();
-                            if (cekKata(temp)) {
-                                status= true;
-                            }
-                            simpanAkhiran = cekAkhiran1;
-                        }
-                        else if (cekAkhiran2.equals("an")){
-                            String temp;
-                            temp = kataku.substring(0, len - 2).toLowerCase();
+        // Pattern to find code
+        String pattern = "^meny([aiueo])(.*)$";  // Sequence of 8 digits'
 
-                            if (cekKata(temp)) {
-                                status= true;
-                            }
-                            simpanAkhiran = cekAkhiran2;
-                        }
-                        else if (cekAkhiran3.equals("i")){
-                            String temp = kataku.substring(0, len - 1).toLowerCase();
-                            if (cekKata(temp)) {
-                                status= true;
-                            }
-                            simpanAkhiran = cekAkhiran3;
-                        }
-                    }
+        Pattern regEx = Pattern.compile(pattern);
 
-                    else {
-
-                        //cek Derivation Prefixes (DP)
-                        //[ DP+ [ DP+ [ DP+] ] ] Kata Dasar [ [+DS] [+PP] [+P] ]
-                        //Awalan yang tidak bermorfologi (“di-”, “ke-” dan “se-”).
-
-                        boolean cekDP = true;
-                        while (cekDP) {
-                            if (cekAwalan2.equals("di") || cekAwalan2.equals("ke") || cekAwalan2.equals("se")) {
-                                if (cekKata(kataku.substring(2, (len - simpanAkhiran.length())))) {
-                                    status = true;
-                                }
-
-                            }
-                            //Awalan yang dapat bermorfologi (“me-”, “be-”,“pe-”, dan “te-”)
-                            else if (cekAwalan2.equals("me") || cekAwalan2.equals("be") || cekAwalan2.equals("pe") || cekAwalan2.equals("te")) {
-                                //TODO : kata2 yang dilarang
-
-                                //yaitu „be-i‟, „di-an‟, „ke-i‟, „ke-kan‟, „mean‟, „se-i‟, „se-kan‟, dan yang terakhir „te-an‟
-                                if (cekAwalan2.equals("be") && cekAkhiran3.equals("i")) {
-                                    status = false;
-                                } else if (cekAwalan2.equals("di") && cekAkhiran2.equals("an")) {
-                                    cekDP = false;
-                                } else if (cekAwalan2.equals("ke") && cekAkhiran2.equals("i")) {
-                                    cekDP = false;
-                                } else if (cekAwalan2.equals("me") && cekAkhiran2.equals("an")) {
-                                    cekDP = false;
-                                } else if (cekAwalan2.equals("se") && cekAkhiran3.equals("i")) {
-                                    cekDP = false;
-                                } else if (cekAwalan2.equals("se") && cekAkhiran2.equals("an")) {
-                                    cekDP = false;
-                                } else if (cekAwalan2.equals("te") && cekAkhiran2.equals("an")) {
-                                    cekDP = false;
-                                }
-
-                                if (cekAwalan2.equals("be")) {
-//                        1 berV... ber-V... | be-rV...
-                                    if (kataku.substring(0, 3).equals("ber") && (kataku.charAt(3) == 'a' || kataku.charAt(3) == 'i' || kataku.charAt(3) == 'u' || kataku.charAt(3) == 'e' || kataku.charAt(3) == 'o')) {
-                                        //cek ber-v
-                                        if (cekKata(kataku.substring(3, (len - simpanAkhiran.length())))) {
-                                            status = true;
-                                        }
-                                        //cek be-rV
-                                        else if (cekKata(kataku.substring(2, len))) {
-                                            status = true;
-                                        }
-                                    }
-//                        2 berCAP... ber-CAP... dimana C!=‟r‟ & P!=‟er‟
-                                    else if (kataku.substring(0, 3).equals("ber")) {
-                                        if ((kataku.charAt(3) != 'a' && kataku.charAt(3) != 'i' && kataku.charAt(3) != 'u' && kataku.charAt(3) != 'e' && kataku.charAt(3) != 'o')) {
-
-                                            if (kataku.charAt(3) != 'r' || !kataku.contains("er")) {
-                                                if (cekKata(kataku.substring(3, (len - simpanAkhiran.length())))) {
-                                                    status = true;
-                                                }
-
-                                            }
-//                        3 berCAerV... ber-CaerV... dimana C!=‟r‟
-                                            else if (kataku.charAt(3) != 'r' || kataku.contains("er")) {
-                                                if (cekKata(kataku.substring(3, (len - simpanAkhiran.length())))) {
-                                                    status = true;
-                                                }
-                                            }
-
-                                        }
-                                    }
-//                        4 belajar bel-ajar
-                                    else if (kataku.equals("belajar")) {
-                                        return true;
-                                    }
-//                        5 beC1erC2... be-C1erC2... dimana C1!={‟r‟|‟l‟}
-                                    else if (cekAwalan2.equals("be")) {
-                                        if (kataku.charAt(2) != 'r' || kataku.charAt(2) != 'l') {
-                                            if (cekKata(kataku.substring(2, (len - simpanAkhiran.length())))) {
-                                                status = true;
-                                            }
-
-                                        }
-                                    }
-                                }
-//                        6 terV... ter-V... | te-rV...
-                                else if(cekAwalan2.equals("te"))
-                                {
-                                    if (kataku.substring(0, 3).equals("ter") && (kataku.charAt(3) == 'a' || kataku.charAt(3) == 'i' || kataku.charAt(3) == 'u' || kataku.charAt(3) == 'e' || kataku.charAt(3) == 'o')) {
-                                        //cek ter-v
-                                        if (cekKata(kataku.substring(3, (len - simpanAkhiran.length())))) {
-                                            status = true;
-                                        }
-                                        //cek te-rV
-                                        else if (cekKata(kataku.substring(2, len))) {
-                                            status = true;
-                                        }
-                                    }
-//                        7 terCerV... ter-CerV... dimana C!=‟r‟
-                                    else if (kataku.substring(0, 3).equals("ter")) {
-                                        if ((kataku.charAt(3) != 'a' && kataku.charAt(3) != 'i' && kataku.charAt(3) != 'u' && kataku.charAt(3) != 'e' && kataku.charAt(3) != 'o')) {
-
-                                            if (kataku.charAt(3) != 'r' || kataku.contains("er")) {
-                                                if (cekKata(kataku.substring(3, (len - simpanAkhiran.length())))) {
-                                                    status = true;
-                                                }
-
-                                            }
-
-//                        8 terCP... ter-CP... dimana C!=‟r‟ dan P!=‟er‟
-                                            else if(kataku.charAt(3) != 'r' || !kataku.contains("er"))
-                                            {
-                                                if (cekKata(kataku.substring(3, (len - simpanAkhiran.length())))) {
-                                                    status = true;
-                                                }
-
-                                            }
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match="s"+m.group(1)+m.group(2);
+        }
+        return match;
+    }
 
 
-                                        }
-                                    }
+    private String findMatch19(String myString) {
 
+        String match = "";
 
+        // Pattern to find code
+        String pattern = "^memp([abcdfghijklmopqrstuvwxyz])(.*)$";  // Sequence of 8 digits'
 
-                                }
+        Pattern regEx = Pattern.compile(pattern);
 
-//                        9 teC1erC2... te-C1erC2... dimana C1!=‟r‟
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match="p"+m.group(1)+m.group(2);
+        }
+        return match;
+    }
 
+    //^pe([wy])([aiueo])(.*)$
+    private String findMatch20(String myString) {
 
-                            }
+        String match = "";
 
-                        }
-                    }
+        // Pattern to find code
+        String pattern = "^pe([wy])([aiueo])(.*)$";  // Sequence of 8 digits'
 
-                }
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2)+m.group(3);
+        }
+        return match;
+    }
+
+    private String findMatch21a(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^per([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2);
+        }
+        return match;
+    }
+    private String findMatch21b(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^pe(r[aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+
+        // Find instance of pattern matches
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2);
+        }
+        return match;
+    }
+    private String findMatch23(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^per([bcdfghjklmnpqrstvwxyz])([a-z])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            String pattern2 = "^er(.*)$";
+            regEx = Pattern.compile(pattern2);
+            Matcher m1 =regEx.matcher(m.group(3));
+            if(!m1.find() && m.group(1)!="r")
+            {
+                match=m.group(1)+m.group(2)+m.group(3);
+            }
+        }
+        return match;
+    }
+    //^per([bcdfghjklmnpqrstvwxyz])([a-z])er([aiueo])(.*)$
+
+    private String findMatch24(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^per([bcdfghjklmnpqrstvwxyz])([a-z])er([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+
+            if(m.group(1)!="r")
+            {
+                match=m.group(1)+m.group(2)+"er"+m.group(3)+m.group(4);
+            }
+        }
+        return match;
+    }
+    private String findMatch25(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^pem([bfv])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2);
+
+        }
+        return match;
+    }
+    private String findMatch26a(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^pem([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match="m"+m.group(1)+m.group(2);
+        }
+        return match;
+    }
+    private String findMatch26b(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^pem([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match="p"+m.group(1)+m.group(2);
+        }
+        return match;
+    }
+    private String findMatch27(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^pen([cdjz])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2);
+        }
+        return match;
+    }
+    private String findMatch28a(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^pen([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match="n"+m.group(1)+m.group(2);
+        }
+        return match;
+    }
+    private String findMatch28b(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^pen([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match="t"+m.group(1)+m.group(2);
+        }
+        return match;
+    }
+
+    //
+    private String findMatch29(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^peng([bcdfghjklmnpqrstvwxyz])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2);
+        }
+        return match;
+    }
+    //
+    private String findMatch30a(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^peng([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2);
+        }
+        return match;
+    }
+
+    private String findMatch30b(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^peng([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match="k"+m.group(1)+m.group(2);
+        }
+        return match;
+    }
+    private String findMatch30c(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^penge(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1);
+        }
+        return match;
+    }
+    private String findMatch31a(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^peny([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match="ny"+m.group(1)+m.group(2);
+        }
+        return match;
+    }
+    private String findMatch31b(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^peny([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match="s"+m.group(1)+m.group(2);
+        }
+        return match;
+    }
+    private String findMatch32(String myString) {
+
+        String match = "";
+        if(myString.equals("pelajar"))
+        {
+            match="ajar";
+        }
+        else {
+            // Pattern to find code
+            String pattern = "^pe(l[aiueo])(.*)$";  // Sequence of 8 digits'
+
+            Pattern regEx = Pattern.compile(pattern);
+            Matcher m = regEx.matcher(myString);
+            if (m.find()) {
+                match = m.group(1) + m.group(2);
+            }
+        }
+        return match;
+    }
+    private String findMatch34(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^pe([bcdfghjklmnpqrstvwxyz])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            String pattern2 = "^er(.*)$";
+            regEx = Pattern.compile(pattern2);
+            Matcher m1 =regEx.matcher(m.group(2));
+            if(!m1.find())
+            {
+                match=m.group(1)+m.group(2);
+            }
+        }
+        return match;
+    }
+    private String findMatch35(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^ter([bcdfghjkpqstvxz])(er[bcdfghjklmnpqrstvwxyz])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2)+m.group(3);
+        }
+        return match;
+    }
+    //^pe([bcdfghjkpqstvxz])(er[bcdfghjklmnpqrstvwxyz])(.*)$
+    private String findMatch36(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^pe([bcdfghjkpqstvxz])(er[bcdfghjklmnpqrstvwxyz])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2)+m.group(3);
+        }
+        return match;
+    }
+    private String findMatch37a(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^([bcdfghjklmnpqrstvwxyz])(er[aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2)+m.group(3);
+        }
+        return match;
+    }
+    private String findMatch37b(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^([bcdfghjklmnpqrstvwxyz])er([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2)+m.group(3);
+        }
+        return match;
+    }
+    private String findMatch38a(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^([bcdfghjklmnpqrstvwxyz])(el[aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2)+m.group(3);
+        }
+        return match;
+    }
+    private String findMatch38b(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^([bcdfghjklmnpqrstvwxyz])el([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2)+m.group(3);
+        }
+        return match;
+    }
+    private String findMatch39a(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^([bcdfghjklmnpqrstvwxyz])(em[aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2)+m.group(3);
+        }
+        return match;
+    }
+    private String findMatch39b(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^([bcdfghjklmnpqrstvwxyz])em([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2)+m.group(3);
+        }
+        return match;
+    }
+    private String findMatch40a(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^([bcdfghjklmnpqrstvwxyz])(in[aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2)+m.group(3);
+        }
+        return match;
+    }
+    private String findMatch40b(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^([bcdfghjklmnpqrstvwxyz])in([aiueo])(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1)+m.group(2)+m.group(3);
+        }
+        return match;
+    }
+    private String findMatch41(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^ku(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1);
+        }
+        return match;
+    }
+    private String findMatch42(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^kau(.*)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            match=m.group(1);
+        }
+        return match;
+    }
+    public String removeSuffix(String kata){
+        //(is|isme|isasi|i|kan|an)$
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "(is|isme|isasi|i|kan|an)$";  // Sequence of 8 digits'
+        match = kata.replaceAll(pattern,"");
+        /*
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(kata);
+        if (m.find()) {
+            match=m.group(0);
+            removalClass temp1 = new removalClass();
+            temp1.affixType = "DS";
+            temp1.removedPart = match;
+            match = kata.split(match)[0];
+            myremoval.add(temp1);
+        }*/
+        return match;
+    }
+    //-*(lah|kah|tah|pun)$
+    public String removeInflectionalParticle(String kata){
+        //(is|isme|isasi|i|kan|an)$
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "-*(lah|kah|tah|pun)$";  // Sequence of 8 digits'
+        match = kata.replaceAll(pattern,"");
+        /*Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(kata);
+        if (m.find()) {
+            match=m.group(1);
+            removalClass temp1 = new removalClass();
+            temp1.affixType = "P";
+            temp1.removedPart = match;
+            match = kata.split(match)[0];
+            myremoval.add(temp1);
+        }*/
+        return match;
+    }
+    //inflectional possessive pronoun
+    public String removeInflectionalPossesivePronoun(String kata){
+        //(is|isme|isasi|i|kan|an)$
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "--*(ku|mu|nya)$";  // Sequence of 8 digits'
+        match = kata.replaceAll(pattern,"");
+        /*Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(kata);
+        if (m.find()) {
+            match=m.group(1);
+            removalClass temp1 = new removalClass();
+            temp1.affixType = "DS";
+            temp1.removedPart = match;
+            match = kata.split(match)[0];
+            myremoval.add(temp1);
+        }*/
+        return match;
+    }
+
+    //^(di|ke|se)
+    private String removePlainPrefix(String kata){
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^(di|ke|se)";  // Sequence of 8 digits'
+        match = kata.replaceAll(pattern,"");
+        /*Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(kata);
+        if (m.find()) {
+            match=m.group(1);
+            removalClass temp1 = new removalClass();
+            temp1.affixType = "DP";
+            temp1.removedPart = match;
+            match = kata.split(match)[0];
+            myremoval.add(temp1);
+        }*/
+        return match;
+
+    }
+    private String checkPrural(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^(.*)-(ku|mu|nya|lah|kah|tah|pun)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            if(myString.contains("-"))
+            {
+                stemPrural(m.group(1));
+
+                return m.group(1);
 
             }
         }
-        return status;
+        return myString;
     }
+
+
+    private String stemPrural(String myString) {
+
+        String match = "";
+
+        // Pattern to find code
+        String pattern = "^(.*)-(ku|mu|nya|lah|kah|tah|pun)$";  // Sequence of 8 digits'
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(myString);
+        if (m.find()) {
+            if(myString.contains("-"))
+            {
+                //^(.*)-(.*)$
+                String pattern1 = "^(.*)-(.*)$";  // Sequence of 8 digits'
+
+                Pattern regEx1 = Pattern.compile(pattern);
+                Matcher m1 = regEx.matcher(myString);
+                if(!m1.group(1).isEmpty() || !m1.group(2).isEmpty())
+                {
+/*
+* // malaikat-malaikat-nya -> malaikat malaikat-nya
+        $suffix = $words[2];
+        if (in_array($suffix, array('ku', 'mu', 'nya', 'lah', 'kah', 'tah', 'pun')) &&
+            preg_match('/^(.*)-(.*)$/', $words[1], $words)) {
+            $words[2] .= '-' . $suffix;
+        }
+
+        // berbalas-balasan -> balas
+        $rootWord1 = $this->stemSingularWord($words[1]);
+        $rootWord2 = $this->stemSingularWord($words[2]);
+
+        // meniru-nirukan -> tiru
+        if (!$this->dictionary->contains($words[2]) && $rootWord2 === $words[2]) {
+            $rootWord2 = $this->stemSingularWord('me' . $words[2]);
+        }
+
+        if ($rootWord1 == $rootWord2) {
+            return $rootWord1;
+        } else {
+            return $plural;
+        }
+* */
+
+                }
+                return m.group(1);
+
+            }
+        }
+        return myString;
+    }
+
+    private String check(String myString) {
+        String match="";
+        //check prural
+        String temp = myString;
+        myString = checkPrural(myString);
+
+        //cek short kata
+        if(myString.length()<=3)
+        {
+            Log.i("stem","kata terlalu singkat, tidak bisa berimbuhan");
+            match = myString;
+        }
+        else {
+            temp = myString;
+
+            //suffix
+            if(!removeInflectionalParticle(myString).equals(""))
+            {
+                myString = removeInflectionalParticle(myString);
+            }
+            else if(!removeInflectionalPossesivePronoun(myString).equals(""))
+            {
+
+                myString = removeInflectionalPossesivePronoun(myString);
+            }
+            else if(!removeSuffix(myString).equals("")){
+
+                myString = removeSuffix(myString);
+            }
+            // {di|ke|se}
+
+            String sementara ="";
+            if(!removePlainPrefix(myString).equals("")){
+                match = removePlainPrefix(myString);
+            }
+
+            else if (!findMatch1a(myString).equals("")) {
+                sementara = findMatch1a(myString);
+                if(cekKata(sementara))
+                {
+                    match = sementara;
+                }
+                else{
+                    if (!findMatch1b(myString).equals("")) {
+                        match = findMatch1b(myString);
+                    }
+                }
+
+            }  else if (!findMatch2(myString).equals("")) {
+                match = findMatch2(myString);
+            } else if (!findMatch3(myString).equals("")) {
+                match = findMatch3(myString);
+            } else if (!findMatch4(myString).equals("")) {
+                match = findMatch4(myString);
+            } else if (!findMatch5(myString).equals("")) {
+                match = findMatch5(myString);
+            } else if (!findMatch6a(myString).equals("")) {
+                sementara = findMatch6a(myString);
+                if(cekKata(sementara))
+                {
+                    match = sementara;
+                }
+                else{
+                    if (!findMatch6b(myString).equals("")) {
+                        match = findMatch6b(myString);
+
+                    }
+                }
+
+            } else if (!findMatch7(myString).equals("")) {
+                match = findMatch7(myString);
+            } else if (!findMatch8(myString).equals("")) {
+                match = findMatch8(myString);
+            } else if (!findMatch9(myString).equals("")) {
+                match = findMatch9(myString);
+            } else if (!findMatch10(myString).equals("")) {
+                match = findMatch10(myString);
+            } else if (!findMatch11(myString).equals("")) {
+                match = findMatch11(myString);
+            } else if (!findMatch12(myString).equals("")) {
+                match = findMatch12(myString);
+            } else if (!findMatch13a(myString).equals("")) {
+                sementara = findMatch13a(myString);
+                if(cekKata(sementara)) {
+                    match = sementara;
+                } else{
+                    if (!findMatch13b(myString).equals("")) {
+                        match = findMatch13b(myString);
+
+                    }
+                }
+
+            }  else if (!findMatch14(myString).equals("")) {
+                match = findMatch14(myString);
+            } else if (!findMatch15a(myString).equals("")) {
+                sementara = findMatch15a(myString);
+                if(cekKata(sementara)) {
+                    match = sementara;
+                } else{
+                    if (!findMatch15b(myString).equals("")) {
+                        match = findMatch15b(myString);
+
+                    }
+                }
+            } else if (!findMatch16(myString).equals("")) {
+                match = findMatch16(myString);
+            } else if (!findMatch17a(myString).equals("")) {
+                sementara = findMatch17a(myString);
+                if(cekKata(sementara)) {
+                    match = sementara;
+                } else {
+                    sementara = findMatch17b(myString);
+                    if(cekKata(sementara)) {
+                        match = sementara;
+                    }
+                    else if (!findMatch17c(myString).equals("")) {
+
+                        match = findMatch17c(myString);
+
+                    }
+                }
+            } else if (!findMatch18a(myString).equals("")) {
+                sementara = findMatch18a(myString);
+                if(cekKata(sementara)) {
+                    match = sementara;
+                } else {
+                    if (!findMatch18b(myString).equals("")) {
+                        match = findMatch18b(myString);
+
+                    }
+                }
+            } else if (!findMatch19(myString).equals("")) {
+                match = findMatch19(myString);
+            } else if (!findMatch20(myString).equals("")) {
+                match = findMatch20(myString);
+            } else if (!findMatch21a(myString).equals("")) {
+                sementara = findMatch21a(myString);
+                if(cekKata(sementara)) {
+                    match = sementara;
+                } else {
+                    if (!findMatch21b(myString).equals("")) {
+                        match = findMatch21b(myString);
+
+                    }
+                }
+            } else if (!findMatch23(myString).equals("")) {
+                match = findMatch23(myString);
+            } else if (!findMatch24(myString).equals("")) {
+                match = findMatch24(myString);
+            } else if (!findMatch25(myString).equals("")) {
+                match = findMatch25(myString);
+            } else if (!findMatch26a(myString).equals("")) {
+                sementara = findMatch26a(myString);
+                if(cekKata(sementara)) {
+                    match = sementara;
+                } else {
+                    if (!findMatch26b(myString).equals("")) {
+                        match = findMatch26b(myString);
+
+                    }
+                }
+            } else if (!findMatch27(myString).equals("")) {
+                match = findMatch27(myString);
+            } else if (!findMatch28a(myString).equals("")) {
+                sementara = findMatch28a(myString);
+                if(cekKata(sementara)) {
+                    match = sementara;
+                } else {
+                    if (!findMatch28b(myString).equals("")) {
+                        match = findMatch28b(myString);
+
+                    }
+                }
+            } else if (!findMatch29(myString).equals("")) {
+                return findMatch29(myString);
+            } else if (!findMatch30a(myString).equals("")) {
+                sementara = findMatch30a(myString);
+                if(cekKata(sementara)) {
+                    match = sementara;
+                } else {
+                    sementara = findMatch30b(myString);
+                    if (cekKata(sementara)) {
+                        match = sementara;
+                    } else if (!findMatch30c(myString).equals("")) {
+
+                        match = findMatch30c(myString);
+
+                    }
+                }
+            } else if (!findMatch31a(myString).equals("")) {
+                sementara = findMatch31a(myString);
+                if(cekKata(sementara)) {
+                    match = sementara;
+                } else {
+                    if (!findMatch31b(myString).equals("")) {
+                        match = findMatch31b(myString);
+
+                    }
+                }
+            } else if (!findMatch32(myString).equals("")) {
+                match = findMatch32(myString);
+            } else if (!findMatch34(myString).equals("")) {
+                match = findMatch34(myString);
+            } else if (!findMatch35(myString).equals("")) {
+                match = findMatch35(myString);
+            } else if (!findMatch36(myString).equals("")) {
+                match = findMatch36(myString);
+            }
+        }
+
+
+        return match;
+    }
+
 
     public boolean cekKata(String kataku) {
 //        String par = ma.getText().toString();
@@ -508,540 +1569,10 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
 
     public boolean stemming(String kataku)
     {
-        boolean status=false;
-
-        int awal = 0;
-        int akhir1 = 3;//untuk yang jumlahnya 2 huruf
-        int akhir2 = 2;//untuk yang jumlahnya 3 huruf
-        String dasar1;
-        int akhiran1;
-        kataku=kataku.replace("\r","");
-        int len = kataku.length();
-
-        int pot=0;
-        String cekKataku = null, cekKataku2 = null,cekKataku3 = null,dasar=kataku;
-        String cekAkhiran1=null, cekAkhiran2=null, cekAkhiran3 = null;
-        String prefix="";
-        int akhir3=4;//untuk yang jumlahnya 4 huruf
-        try{
-            //cek angka atau bukan
-            Double kya = Double.parseDouble(dasar);
-            status=true;
-            return status;
-        }catch (NumberFormatException e) {
-
-            if (len > 1) {
-
-                //ambil awalan kata
-                if (len > 3) {
-                    cekKataku = kataku.substring(awal, akhir1).toLowerCase();
-                    cekKataku3 = kataku.substring(awal, akhir3).toLowerCase();
-                    cekKataku2 = kataku.substring(awal, akhir2).toLowerCase();
-                    //ambil akhiran kata
-                    cekAkhiran1 = kataku.substring(len - 1, len).toLowerCase();
-                    cekAkhiran2 = kataku.substring(len - 2, len).toLowerCase();
-                    cekAkhiran3 = kataku.substring(len - 3, len).toLowerCase();
-                } else {
-                    cekKataku = kataku.toLowerCase();
-                    cekKataku2 = kataku.toLowerCase();
-
-                    cekKataku3 = kataku.toLowerCase();
-                    cekAkhiran1 = kataku.substring(len - 1, len).toLowerCase();
-                    cekAkhiran2 = kataku.substring(len - 2, len).toLowerCase();
-                    cekAkhiran3 = kataku.substring(len - 1, len).toLowerCase();
-
-                }
-                if (cekKata(kataku)) {
-
-                   // kata.updateJumData(db,kata.getJumKata(db,kataku)+1,kataku);
-                    status = true;
-                }
-                else if(cekKataHistori(kataku))
-                {
-                    status=true;
-                }
-
-                if (cekAkhiran3.equals("kah") || cekAkhiran3.equals("lah") || cekAkhiran3.equals("pun")) {
-                    dasar1 = kataku;
-                    dasar1 = dasar1.substring(awal, len - 3).toLowerCase();
-
-                    if (cekKata(dasar1)) {
-                        //kata ada di database
-                        //Log.i("kata berakhiran i", "ada di db " + dasar);
-                      //  kata.updateJumData(db, kata.getJumKata(db, dasar1)+1, dasar1);
-                        status = true;
-                        return status;
-                    }
-                }
-                //cek akhiran inflectional possesive pronouns
-
-                if (cekAkhiran2.equals("ku") || cekAkhiran2.equals("mu") || cekAkhiran3.equals("nya")) {
-                    dasar1 = kataku;
-                    if (cekAkhiran3.equals("nya")) {
-                        dasar1 = dasar1.substring(awal, len - 3).toLowerCase();
-                    } else {
-                        dasar1 = dasar1.substring(awal, len - 2).toLowerCase();
-                    }
-
-                    if (cekKata(dasar1)) {
-                        //kata ada di database
-                        //Log.i("kata berakhiran i", "ada di db " + dasar);
-                      //  kata.updateJumData(db,kata.getJumKata(db,dasar1)+1,dasar1);
-
-                        status = true;
-                        return status;
-                    }
-                }
-                if (cekKataku3.equals("meng")) {
-                    prefix = "meng";
-                    dasar = kataku.substring(akhir3, len).toLowerCase();
-                    pot=4;
-                    if (cekKata(dasar)) {
-                     //   kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-
-                        status = true;
-                        return status;
-                    }
-                    else if (cekAkhiran3.equals("kan"))
-                    {
-                        dasar=dasar.substring(0,dasar.length()-3);
-                        if(cekKata(dasar))
-                        {
-                            status = true;
-                            return status;
-
-                        }
-
-
-                    }
-                }
-                if (cekKataku3.equals("meny")) {
-                    prefix = "meny";
-                    pot=4;
-                    dasar = kataku.substring(akhir3, len).toLowerCase();
-                    if (cekKata(dasar)) {
-                    //    kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                        status = true;
-                        return status;
-                    }
-                }
-                if (cekKataku3.equals("meny")) {
-                    pot=4;
-                    prefix = "meny";
-                    dasar = kataku.substring(akhir3, len).toLowerCase();
-                    if (cekKata(dasar)) {
-
-                        //kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                        status = true;
-                        return status;
-                    } else {
-                        //kataserapan
-                        char cek = dasar.charAt(0);
-                        String cekcek=dasar;
-                        if(cek == 'a' || cek == 'i' || cek == 'u' || cek == 'e' || cek == 'o' )
-                        {
-                            String temppy=DBKata.getCekKataVowel(db,cekcek);
-                            if(temppy!="")
-                            {
-                                status=true;
-                                return status;
-
-                            }
-                            String temp = "s".concat(dasar);
-                            if (cekKata(temp)) {
-                                //    kata.updateJumData(db,kata.getJumKata(db,temp)+1,temp);
-                                //kalau ada di db
-                                if (kata.getType(db, temp) == "v") {
-                                    status = stemming(temp);
-                                    return status;
-                                }
-                            }
-                        }
-
-                    }
-                }
-                if (cekKataku.equals("men")) {
-                    prefix = "men";
-                    pot=3;
-                    dasar = kataku.substring(akhir1, len).toLowerCase();
-                    if(dasar.charAt(0)=='s')
-                    {
-                        status = false;
-                        return status;
-                    }
-                    else if(dasar.charAt(0)=='t')
-                    {
-                        status = false;
-                        return status;
-                    }
-                    else if (cekKata(dasar)) {
-                      //  kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                        status = true;
-                        return status;
-                    }
-                    else
-                    {
-                        //kataserapan
-                        char cek = dasar.charAt(0);
-                        String cekcek=dasar;
-                        if(cek == 'a' || cek == 'i' || cek == 'u' || cek == 'e' || cek == 'o' )
-                        {
-                            String temppy=DBKata.getCekKataVowel(db,cekcek);
-                            if(temppy!="")
-                            {
-                                status=true;
-                                return status;
-
-                            }
-                            String temp = "t".concat(dasar);
-                            if (cekKata(temp)) {
-                                if (kata.getType(db, temp) == "v") {
-                                    //    kata.updateJumData(db,kata.getJumKata(db,temp)+1,temp);
-                                    status = true;
-                                    return status;
-                                }
-                            }
-                            else
-                            {
-                                status = stemming(temp);
-                            }
-                        }
-
-                    }
-                }
-
-                if (cekKataku.equals("mem")) {
-                    prefix = "mem";
-                    pot=3;
-                    dasar = kataku.substring(akhir1, len).toLowerCase();
-                    if (cekKata(dasar)) {
-                     //   kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                        status = true;
-                        return status;
-                    } else {
-
-                        //kataserapan
-                        if (cekAkhiran3.equals("kan"))
-                        {
-                            dasar=dasar.substring(0,dasar.length()-3);
-                            if(cekKata(dasar))
-                            {
-                                status = true;
-                                return status;
-
-                            }
-
-
-                        }
-
-                        String temp = "p".concat(dasar);
-                        if (cekKata(temp)) {
-                            if (kata.getType(db, temp) == "v") {
-                         //       kata.updateJumData(db,kata.getJumKata(db,temp)+1,temp);
-                                status = true;
-                                return status;
-                            }
-
-                            else
-                            {
-                                status = stemming(temp);
-                            }
-                        }
-                        else if(cekKata(dasar)) {
-
-                        }
-
-                    }
-                }
-
-                if (cekKataku2.equals("me")) {
-                    pot=2;
-                    prefix = "me";
-                    dasar = kataku.substring(akhir2, len);
-
-                    if (cekKata(dasar)) {
-
-                        //kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                        status = true;
-                        return status;
-                    }
-                }
-                if (cekKataku3.equals("peng")) {
-                    pot=4;
-                    prefix = "peng";
-                    dasar = kataku.substring(akhir3, len).toLowerCase();
-                    if (cekKata(dasar)) {
-                        //kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-
-                        status = true;
-                        return status;
-                    }
-
-                }
-                if (cekKataku3.equals("peny")) {
-                    pot=4;
-                    prefix = "peny";
-                    dasar = kataku.substring(pot, len).toLowerCase();
-                    if (cekKata(dasar)) {
-
-                        //kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                        status = true;
-                        return status;
-                    } else {
-                        //kataserapan
-                        char cek = dasar.charAt(0);
-                        String cekcek=dasar;
-                        if(cek == 'a' || cek == 'i' || cek == 'u' || cek == 'e' || cek == 'o' )
-                        {
-                            String temppy=DBKata.getCekKataVowel(db,cekcek);
-                            if(temppy!="")
-                            {
-                                status=true;
-                                return status;
-
-                            }
-
-                        }
-
-
-                        /*String temp = "s".concat(dasar);
-                        if (cekKata(temp)) {
-
-//                            kata.updateJumData(db,kata.getJumKata(db,temp)+1,temp);
-                            //kalau ada di db
-                            if (kata.getType(db, temp) == "v") {
-
-                             //   kata.updateJumData(db,kata.getJumKata(db,temp)+1,temp);
-                                status = true;
-                                return status;
-                            }
-
-                            else
-                            {
-                                status = stemming(temp);
-                            }
-                        }*/
-
-                    }
-                }
-                if (cekKataku.equals("pen")) {
-                    pot=3;prefix = "pen";
-                    dasar = kataku.substring(akhir1, len).toLowerCase();
-                    if (cekKata(dasar)) {
-
-                        //kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                        status = true;
-                        return status;
-                    }
-                }
-                if (cekKataku.equals("pem")) {
-                    pot=3;prefix = "pem";
-                    dasar = kataku.substring(pot, len).toLowerCase();
-                    if (cekKata(dasar)) {
-
-                        //kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                        status = true;
-                        return status;
-                    } else {
-                        //kataserapan
-                        char cek = dasar.charAt(0);
-                        String cekcek=dasar;
-                        if(cek == 'a' || cek == 'i' || cek == 'u' || cek == 'e' || cek == 'o' )
-                        {
-                            String temppy=DBKata.getCekKataVowel(db,cekcek);
-                            if(temppy!="")
-                            {
-                                status=true;
-                                return status;
-
-                            }
-
-                        }
-
-                        String temp = "p".concat(dasar);
-                        if (cekKata(temp)) {
-                            //kalau ada di db
-                            if (kata.getType(db, temp) == "v") {
-                                status = true;
-                                //kata.updateJumData(db,kata.getJumKata(db,temp)+1,temp);
-                                return status;
-                            }
-                        }
-
-                        else
-                        {
-                            status = stemming(temp);
-                        }
-
-                    }
-                }
-
-                if (cekKataku2.equals("di")) {
-                    pot=2;prefix = "di";
-                    dasar = kataku.substring(akhir2, len).toLowerCase();
-                    if (cekKata(dasar)) {
-
-                        //kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                        status = true;
-
-                    }
-                }
-
-                if (cekKataku.equals("ter")) {
-                    pot=3;prefix = "ter";
-                    dasar = kataku.substring(akhir1, len).toLowerCase();
-                    if (cekKata(dasar)) {
-
-                        //kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                        status = true;
-                    }
-                }
-
-                else if (cekKataku2.equals("ke")) {
-                    pot=2;prefix = "ke";
-                    dasar = kataku.substring(akhir2, len).toLowerCase();
-                    if (cekKata(dasar)) {
-
-                       // kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                        status = true;return status;
-                    }
-                }
-
-                if (cekKataku.equals("ber")) {
-                    pot=3;prefix = "ber";
-                    dasar = kataku.substring(akhir1, len).toLowerCase();
-                    if (cekKata(dasar)) {
-
-                        //kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                        status = true;return status;
-                    }
-                }
-
-                if (cekKataku.equals("bel")) {
-                    pot=3;prefix = "bel";
-                    dasar = kataku.substring(akhir1, len).toLowerCase();
-                    if (dasar.equals("ajar")) {
-
-                        //kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                        status = true;return status;
-                    }
-                }
-                if (cekKataku2.equals("be")) {
-                    pot=2;prefix = "be";
-                    dasar = kataku.substring(akhir2, len).toLowerCase();
-                    if (cekKata(dasar)) {
-
-                        //kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                        status = true;return status;
-                    }
-                }
-                if (cekKataku.equals("per")) {
-                    pot=3;prefix = "per";
-                    dasar = kataku.substring(akhir1, len).toLowerCase();
-                    if (cekKata(dasar)) {
-
-                        //kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                        status = true;return status;
-                    }
-                }
-                if (cekKataku.equals("pel")) {
-                    pot=3;prefix = "pel";
-
-                    dasar = kataku.substring(akhir1, len).toLowerCase();
-                    if (dasar.equals("ajar")) {
-
-                        //kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                        status = true;return status;
-                    }
-                }
-                if (cekKataku2.equals("pe")) {
-                    pot=2;prefix = "pe";
-                    dasar = kataku.substring(akhir2, len).toLowerCase();
-                    if (cekKata(dasar)) {
-
-                       // kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                        status = true;return status;
-                    }
-                }
-                if (cekAkhiran3.equals("kan")) {
-
-                    dasar = kataku.substring(pot, len-3).toLowerCase();
-                    String dasar1ku = kataku.substring(pot+1, len-2).toLowerCase();
-                    String dasar2 = kataku.substring(pot+2, len-2).toLowerCase();
-                    if(cekKata(dasar) || cekKata(dasar1ku) || cekKata(dasar2) ) {
-                        if (!prefix.equals("ke") || !prefix.equals("peng")) {
-
-                            //kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                            status = true;return status;
-                        }
-                    }
-                    else
-                    {
-                        dasar = kataku.substring(awal, len-1).toLowerCase();
-                        if(cekKata(dasar)) {
-                            if (!prefix.equals("ke") || !prefix.equals("peng")) {
-
-                              //  kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                                status = true;return status;
-                            }
-                        }
-                    }
-
-                }
-                if (cekAkhiran2.equals("an")) {
-
-                    dasar = kataku.substring(pot, len-2).toLowerCase();
-                    String dasar1ku = kataku.substring(pot+1, len-2).toLowerCase();
-                    String dasar2 = kataku.substring(pot+2, len-2).toLowerCase();
-                    if(cekKata(dasar) || cekKata(dasar1ku) || cekKata(dasar2) ) {
-                        if (!prefix.equals("meng") || !prefix.equals("di") || !prefix.equals("ter")) {
-
-                          //  kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                            status = true;return status;
-                        }
-                    }
-                    else
-                    {
-                        dasar = kataku.substring(awal, len-2).toLowerCase();
-                        if(cekKata(dasar)) {
-
-                          //  kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                            if (!prefix.equals("meng") || !prefix.equals("di") || !prefix.equals("ter")) {
-                                status = true;return status;
-                            }
-                        }
-
-                    }
-                }
-                if (cekAkhiran1.equals("i")) {
-
-                    dasar = kataku.substring(pot, len-1).toLowerCase();
-                    String dasar1ku = kataku.substring(pot+1, len-2).toLowerCase();
-                    String dasar2 = kataku.substring(pot+2, len-2).toLowerCase();
-                    if(cekKata(dasar) || cekKata(dasar1ku) || cekKata(dasar2) ) {
-
-                        if (!prefix.equals("ber") || !prefix.equals("ke") || !prefix.equals("peng")) {
-
-                        //    kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);
-                            status = true;return status;
-                        }
-                    }
-                    else
-                    {
-                        dasar = kataku.substring(awal, len - 1).toLowerCase();
-                        if(cekKata(dasar)) {
-                            if (!prefix.equals("ber") || !prefix.equals("ke") || !prefix.equals("peng")) {
-
-                          //      kata.updateJumData(db,kata.getJumKata(db,dasar)+1,dasar);    status = true;return status;
-                            }
-                        }
-                    }
-                }
-
-            }
-        }
-        //cek akhiran particles
+        boolean status = startStemming(kataku);
+        Log.i("hasil", String.valueOf(status));
         return status;
+
     }
   public int getPositionFromSeparator(int firstChar)
     {
@@ -1101,7 +1632,96 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
         }
         return posBefore;
     }
+    public boolean lala(String kata,String pattern)
+    {
+        String match = "";
 
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(kata);
+        if (m.find()) {
+            return true;
+
+        }
+        return false;
+
+    }
+    public String checkValidImbuhan(String kata)
+    {
+        String pattern2[] = {"^be(.*)lah$",
+                "^be(.*)an$",
+                "^me(.*)i$",
+                "^di(.*)i$",
+                "^pe(.*)i$",
+                "^ter(.*)i$"};
+        String pattern1 = "^me(.*)kan$";
+
+
+        String pattern[] = {"^ber(.*)i$",
+                "^di(.*)an$",
+                "^ke(.*)i$",
+                "^ke(.*)an$",
+                "^me(.*)an$",
+                "^me(.*)an$",
+                "^ter(.*)an$",
+                "^per(.*)an$",};
+        boolean statusCheck = true;
+        int i=0;
+        int count=0;
+
+        String match = "";
+
+        // Pattern to find code
+
+        Pattern regEx = Pattern.compile(pattern1);
+        Matcher m = regEx.matcher(kata);
+        if (m.find()) {
+            match = check(kata);
+        }
+        else if(kata.equals("ketahui"))
+        {
+            match=kata;
+        }
+        else {
+            while (statusCheck || i < pattern.length) {
+                statusCheck = lala(kata, pattern[i]);
+                if (!statusCheck) {
+                    count++;
+                }
+                i++;
+            }
+
+            if (count == pattern.length) {
+                //remove prefix
+                match = check(kata);
+            }
+        }
+        return match;
+    }
+
+
+
+    public boolean startStemming(String kataku)
+    {
+        boolean status=false;
+        //cek kata ada di dictionary ga
+        if(cekKata(kataku))
+        {
+            status=true;
+        }
+        else
+        {
+
+            String hsl = checkValidImbuhan(kataku);
+            Log.i("hasil",hsl);
+            if(cekKata(hsl)) {
+                status=true;
+            }
+        }
+
+        return status;
+
+
+    }
 
 
 

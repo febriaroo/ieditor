@@ -86,4 +86,4 @@
 	<!-- Android specific -->
 	<type extension=".apk" mimetype="application/vnd.android.package-archive" />
 	
-</MimeTypes><!-- From: file:/C:/Users/Febria/Desktop/SwtCopy/aFileChooser/src/main/res/xml/mimetypes.xml --><!-- From: file:/C:/Users/Febria/Desktop/SwtCopy/aFileChooser/build/intermediates/bundles/debug/res/xml/mimetypes.xml -->
+</MimeTypes><!-- From: file:/Users/febria/Desktop/SwtCopy/aFileChooser/src/main/res/xml/mimetypes.xml --><!-- From: file:/Users/febria/Desktop/SwtCopy/aFileChooser/build/intermediates/bundles/debug/res/xml/mimetypes.xml -->
