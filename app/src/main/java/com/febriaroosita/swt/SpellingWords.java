@@ -1682,7 +1682,11 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
             match=kata;
         }
         else {
-            while (statusCheck || i < pattern.length) {
+            while (statusCheck ) {
+                if(i < pattern.length)
+                {
+                    break;
+                }
                 statusCheck = lala(kata, pattern[i]);
                 if (!statusCheck) {
                     count++;

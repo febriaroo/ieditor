@@ -73,6 +73,8 @@ public class DbKata extends SQLiteOpenHelper {
         Cursor cursor =  db.rawQuery( "select * from "+TABLE_NAME+" where "+COLUMNS[1]+"='"+kata.toLowerCase()+"'", null );
         if(cursor.moveToFirst())
         {
+            if(cursor != null)
+                cursor.close();
             return true;
             //data.id_kata = cursor.getInt(0);
             //data.kata = cursor.getString(1);
@@ -89,8 +91,11 @@ public class DbKata extends SQLiteOpenHelper {
         Cursor cursor =  db.rawQuery( "select jumlah_digunakan from "+TABLE_NAME+" where "+COLUMNS[1]+"='"+kata.toLowerCase()+"'", null );
         if(cursor.moveToFirst())
         {
+            int temp= cursor.getInt(0);
+            if(cursor != null)
+                cursor.close();
 
-            return cursor.getInt(0);
+            return temp;
             //data.id_kata = cursor.getInt(0);
             //data.kata = cursor.getString(1);
         }
@@ -159,7 +164,7 @@ public class DbKata extends SQLiteOpenHelper {
     public String getType(SQLiteDatabase db,String kata){
         CKata data = new CKata();
 
-        Cursor cursor =  db.rawQuery("select tipe from "+TABLE_NAME+" where "+COLUMNS[1]+"="+kata+"",null );
+        Cursor cursor =  db.rawQuery("select tipe from "+TABLE_NAME+" where "+COLUMNS[1]+"='"+kata.toLowerCase()+"'",null );
         if(cursor.moveToFirst())
         {
             String my=cursor.getString(0);
