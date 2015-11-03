@@ -1105,7 +1105,7 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
         String match = "";
 
         // Pattern to find code
-        String pattern = "--*(ku|mu|nya)$";  // Sequence of 8 digits'
+        String pattern = "(ku|mu|nya)$";  // Sequence of 8 digits'
         match = kata.replaceAll(pattern,"");
         /*Pattern regEx = Pattern.compile(pattern);
         Matcher m = regEx.matcher(kata);
@@ -1233,12 +1233,12 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
             {
                 myString = removeInflectionalParticle(myString);
             }
-            else if(!removeInflectionalPossesivePronoun(myString).equals(""))
+            if(!removeInflectionalPossesivePronoun(myString).equals(""))
             {
 
                 myString = removeInflectionalPossesivePronoun(myString);
             }
-            else if(!removeSuffix(myString).equals("")){
+            if(!removeSuffix(myString).equals("")){
 
                 myString = removeSuffix(myString);
             }
@@ -1249,7 +1249,7 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
                 match = removePlainPrefix(myString);
             }
 
-            else if (!findMatch1a(myString).equals("")) {
+             if (!findMatch1a(myString).equals("")) {
                 sementara = findMatch1a(myString);
                 if(cekKata(sementara))
                 {
@@ -1421,6 +1421,56 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
             } else if (!findMatch36(myString).equals("")) {
                 match = findMatch36(myString);
             }
+            else if (!findMatch37a(myString).equals("")) {
+                sementara = findMatch37a(myString);
+                if(cekKata(sementara)) {
+                    match = sementara;
+                } else {
+                    if (!findMatch37b(myString).equals("")) {
+                        match = findMatch37b(myString);
+
+                    }
+                }
+            }
+            else if (!findMatch38a(myString).equals("")) {
+                sementara = findMatch38a(myString);
+                if(cekKata(sementara)) {
+                    match = sementara;
+                } else {
+                    if (!findMatch38b(myString).equals("")) {
+                        match = findMatch38b(myString);
+
+                    }
+                }
+            }
+            else if (!findMatch39a(myString).equals("")) {
+                sementara = findMatch39a(myString);
+                if(cekKata(sementara)) {
+                    match = sementara;
+                } else {
+                    if (!findMatch39b(myString).equals("")) {
+                        match = findMatch39b(myString);
+
+                    }
+                }
+            }
+            else if (!findMatch40a(myString).equals("")) {
+                sementara = findMatch40a(myString);
+                if(cekKata(sementara)) {
+                    match = sementara;
+                } else {
+                    if (!findMatch40b(myString).equals("")) {
+                        match = findMatch40b(myString);
+
+                    }
+                }
+            }
+            else if (!findMatch41(myString).equals("")) {
+                match = findMatch41(myString);
+            } else if (!findMatch42(myString).equals("")) {
+                match = findMatch42(myString);
+            }
+
         }
 
 
@@ -1656,14 +1706,14 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
         String pattern1 = "^me(.*)kan$";
 
 
-        String pattern[] = {"^ber(.*)i$",
+        String pattern[] = {"^be(.*)i$",
                 "^di(.*)an$",
                 "^ke(.*)i$",
-                "^ke(.*)an$",
+                "^ke(.*)kan$",
                 "^me(.*)an$",
-                "^me(.*)an$",
-                "^ter(.*)an$",
-                "^per(.*)an$",};
+                "^se(.*)i$",
+                "^se(.*)kan$",
+                "^te(.*)an$"};
         boolean statusCheck = true;
         int i=0;
         int count=0;
@@ -1682,8 +1732,8 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
             match=kata;
         }
         else {
-            while (statusCheck ) {
-                if(i < pattern.length)
+            while (true ) {
+                if(i >= pattern.length)
                 {
                     break;
                 }

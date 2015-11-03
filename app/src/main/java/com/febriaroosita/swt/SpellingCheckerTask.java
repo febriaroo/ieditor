@@ -675,9 +675,16 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
         int akhiran1;
         // ^[a-zA-Z]+$
 
-        kataku=kataku.replaceAll("[^\\p{L}\\p{Z}]","");
-        int len = kataku.length();
-        status = startStemming(kataku);
+        try{
+
+            //check angka
+            Double bee = Double.parseDouble(kataku);
+            status = true;
+        }
+        catch (NumberFormatException nfe) {
+            kataku = kataku.replaceAll("[^\\p{L}\\p{Z}]", "");
+            int len = kataku.length();
+            status = startStemming(kataku);
 //        int pot=0;
 //        String cekKataku = null, cekKataku2 = null,cekKataku3 = null,dasar=kataku;
 //        String cekAkhiran1=null, cekAkhiran2=null, cekAkhiran3 = null;
@@ -1097,6 +1104,7 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
 //            }
 //        }
 //        //cek akhiran particles
+        }
         return status;
     }
 
@@ -2124,7 +2132,7 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
         String match = "";
 
         // Pattern to find code
-        String pattern = "-*(lah|kah|tah|pun)$";  // Sequence of 8 digits'
+        String pattern = "(lah|kah|tah|pun)$";  // Sequence of 8 digits'
         match = kata.replaceAll(pattern,"");
         /*Pattern regEx = Pattern.compile(pattern);
         Matcher m = regEx.matcher(kata);
@@ -2144,7 +2152,7 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
         String match = "";
 
         // Pattern to find code
-        String pattern = "--*(ku|mu|nya)$";  // Sequence of 8 digits'
+        String pattern = "(ku|mu|nya)$";  // Sequence of 8 digits'
         match = kata.replaceAll(pattern,"");
         /*Pattern regEx = Pattern.compile(pattern);
         Matcher m = regEx.matcher(kata);
@@ -2162,10 +2170,10 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
     //^(di|ke|se)
     private String removePlainPrefix(String kata){
         String match = "";
-
+        String temp = kata.toLowerCase();
         // Pattern to find code
         String pattern = "^(di|ke|se)";  // Sequence of 8 digits'
-        match = kata.replaceAll(pattern,"");
+        match = temp.replaceAll(pattern,"");
         /*Pattern regEx = Pattern.compile(pattern);
         Matcher m = regEx.matcher(kata);
         if (m.find()) {
@@ -2255,213 +2263,268 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
     private String check(String myString) {
         String match="";
         //check prural
+        myString = myString.toLowerCase();
         String temp = myString;
         myString = checkPrural(myString);
 
-        //cek short kata
-        if(myString.length()<=3)
-        {
-            Log.i("stem","kata terlalu singkat, tidak bisa berimbuhan");
-            match = myString;
-        }
-        else {
-            temp = myString;
+            //cek short kata
 
-            //suffix
-            if(!removeInflectionalParticle(myString).equals(""))
-            {
-                myString = removeInflectionalParticle(myString);
-            }
-            else if(!removeInflectionalPossesivePronoun(myString).equals(""))
-            {
+            if (myString.length() <= 3) {
+                Log.i("stem", "kata terlalu singkat, tidak bisa berimbuhan");
+                match = myString;
+            } else {
+                temp = myString;
 
-                myString = removeInflectionalPossesivePronoun(myString);
-            }
-            else if(!removeSuffix(myString).equals("")){
-
-                myString = removeSuffix(myString);
-            }
-            // {di|ke|se}
-
-            String sementara ="";
-            if(!removePlainPrefix(myString).equals("")){
-                match = removePlainPrefix(myString);
-            }
-
-            else if (!findMatch1a(myString).equals("")) {
-                sementara = findMatch1a(myString);
-                if(cekKata(sementara))
-                {
-                    match = sementara;
+                //suffix
+                if (!removeInflectionalParticle(myString).equals("")) {
+                    myString = removeInflectionalParticle(myString);
+                    if (cekKata(myString)) {
+                        return myString;
+                    }
                 }
-                else{
-                    if (!findMatch1b(myString).equals("")) {
-                        match = findMatch1b(myString);
+                if (!removeInflectionalPossesivePronoun(myString).equals("")) {
+
+                    myString = removeInflectionalPossesivePronoun(myString);
+                    if (cekKata(myString)) {
+                        return myString;
+                    }
+                }
+                if (!removeSuffix(myString).equals("")) {
+
+                    myString = removeSuffix(myString);
+                    if (cekKata(myString)) {
+                        return myString;
+                    }
+                }
+                // {di|ke|se}
+
+                String sementara = "";
+                if (!removePlainPrefix(myString).equals("")) {
+                    match = removePlainPrefix(myString);
+                    if (cekKata(match)) {
+                        return match;
                     }
                 }
 
-            }  else if (!findMatch2(myString).equals("")) {
-                match = findMatch2(myString);
-            } else if (!findMatch3(myString).equals("")) {
-                match = findMatch3(myString);
-            } else if (!findMatch4(myString).equals("")) {
-                match = findMatch4(myString);
-            } else if (!findMatch5(myString).equals("")) {
-                match = findMatch5(myString);
-            } else if (!findMatch6a(myString).equals("")) {
-                sementara = findMatch6a(myString);
-                if(cekKata(sementara))
-                {
-                    match = sementara;
-                }
-                else{
-                    if (!findMatch6b(myString).equals("")) {
-                        match = findMatch6b(myString);
-
-                    }
-                }
-
-            } else if (!findMatch7(myString).equals("")) {
-                match = findMatch7(myString);
-            } else if (!findMatch8(myString).equals("")) {
-                match = findMatch8(myString);
-            } else if (!findMatch9(myString).equals("")) {
-                match = findMatch9(myString);
-            } else if (!findMatch10(myString).equals("")) {
-                match = findMatch10(myString);
-            } else if (!findMatch11(myString).equals("")) {
-                match = findMatch11(myString);
-            } else if (!findMatch12(myString).equals("")) {
-                match = findMatch12(myString);
-            } else if (!findMatch13a(myString).equals("")) {
-                sementara = findMatch13a(myString);
-                if(cekKata(sementara)) {
-                    match = sementara;
-                } else{
-                    if (!findMatch13b(myString).equals("")) {
-                        match = findMatch13b(myString);
-
-                    }
-                }
-
-            }  else if (!findMatch14(myString).equals("")) {
-                match = findMatch14(myString);
-            } else if (!findMatch15a(myString).equals("")) {
-                sementara = findMatch15a(myString);
-                if(cekKata(sementara)) {
-                    match = sementara;
-                } else{
-                    if (!findMatch15b(myString).equals("")) {
-                        match = findMatch15b(myString);
-
-                    }
-                }
-            } else if (!findMatch16(myString).equals("")) {
-                match = findMatch16(myString);
-            } else if (!findMatch17a(myString).equals("")) {
-                sementara = findMatch17a(myString);
-                if(cekKata(sementara)) {
-                    match = sementara;
-                } else {
-                    sementara = findMatch17b(myString);
-                    if(cekKata(sementara)) {
-                        match = sementara;
-                    }
-                    else if (!findMatch17c(myString).equals("")) {
-
-                        match = findMatch17c(myString);
-
-                    }
-                }
-            } else if (!findMatch18a(myString).equals("")) {
-                sementara = findMatch18a(myString);
-                if(cekKata(sementara)) {
-                    match = sementara;
-                } else {
-                    if (!findMatch18b(myString).equals("")) {
-                        match = findMatch18b(myString);
-
-                    }
-                }
-            } else if (!findMatch19(myString).equals("")) {
-                match = findMatch19(myString);
-            } else if (!findMatch20(myString).equals("")) {
-                match = findMatch20(myString);
-            } else if (!findMatch21a(myString).equals("")) {
-                sementara = findMatch21a(myString);
-                if(cekKata(sementara)) {
-                    match = sementara;
-                } else {
-                    if (!findMatch21b(myString).equals("")) {
-                        match = findMatch21b(myString);
-
-                    }
-                }
-            } else if (!findMatch23(myString).equals("")) {
-                match = findMatch23(myString);
-            } else if (!findMatch24(myString).equals("")) {
-                match = findMatch24(myString);
-            } else if (!findMatch25(myString).equals("")) {
-                match = findMatch25(myString);
-            } else if (!findMatch26a(myString).equals("")) {
-                sementara = findMatch26a(myString);
-                if(cekKata(sementara)) {
-                    match = sementara;
-                } else {
-                    if (!findMatch26b(myString).equals("")) {
-                        match = findMatch26b(myString);
-
-                    }
-                }
-            } else if (!findMatch27(myString).equals("")) {
-                match = findMatch27(myString);
-            } else if (!findMatch28a(myString).equals("")) {
-                sementara = findMatch28a(myString);
-                if(cekKata(sementara)) {
-                    match = sementara;
-                } else {
-                    if (!findMatch28b(myString).equals("")) {
-                        match = findMatch28b(myString);
-
-                    }
-                }
-            } else if (!findMatch29(myString).equals("")) {
-                return findMatch29(myString);
-            } else if (!findMatch30a(myString).equals("")) {
-                sementara = findMatch30a(myString);
-                if(cekKata(sementara)) {
-                    match = sementara;
-                } else {
-                    sementara = findMatch30b(myString);
+                if (!findMatch1a(myString).equals("")) {
+                    sementara = findMatch1a(myString);
                     if (cekKata(sementara)) {
                         match = sementara;
-                    } else if (!findMatch30c(myString).equals("")) {
-
-                        match = findMatch30c(myString);
-
+                    } else {
+                        if (!findMatch1b(myString).equals("")) {
+                            match = findMatch1b(myString);
+                        }
                     }
-                }
-            } else if (!findMatch31a(myString).equals("")) {
-                sementara = findMatch31a(myString);
-                if(cekKata(sementara)) {
-                    match = sementara;
-                } else {
-                    if (!findMatch31b(myString).equals("")) {
-                        match = findMatch31b(myString);
 
+                } else if (!findMatch2(myString).equals("")) {
+                    match = findMatch2(myString);
+                } else if (!findMatch3(myString).equals("")) {
+                    match = findMatch3(myString);
+                } else if (!findMatch4(myString).equals("")) {
+                    match = findMatch4(myString);
+                } else if (!findMatch5(myString).equals("")) {
+                    match = findMatch5(myString);
+                } else if (!findMatch6a(myString).equals("")) {
+                    sementara = findMatch6a(myString);
+                    if (cekKata(sementara)) {
+                        match = sementara;
+                    } else {
+                        if (!findMatch6b(myString).equals("")) {
+                            match = findMatch6b(myString);
+
+                        }
                     }
+
+                } else if (!findMatch7(myString).equals("")) {
+                    match = findMatch7(myString);
+                } else if (!findMatch8(myString).equals("")) {
+                    match = findMatch8(myString);
+                } else if (!findMatch9(myString).equals("")) {
+                    match = findMatch9(myString);
+                } else if (!findMatch10(myString).equals("")) {
+                    match = findMatch10(myString);
+                } else if (!findMatch11(myString).equals("")) {
+                    match = findMatch11(myString);
+                } else if (!findMatch12(myString).equals("")) {
+                    match = findMatch12(myString);
+                } else if (!findMatch13a(myString).equals("")) {
+                    sementara = findMatch13a(myString);
+                    if (cekKata(sementara)) {
+                        match = sementara;
+                    } else {
+                        if (!findMatch13b(myString).equals("")) {
+                            match = findMatch13b(myString);
+
+                        }
+                    }
+
+                } else if (!findMatch14(myString).equals("")) {
+                    match = findMatch14(myString);
+                } else if (!findMatch15a(myString).equals("")) {
+                    sementara = findMatch15a(myString);
+                    if (cekKata(sementara)) {
+                        match = sementara;
+                    } else {
+                        if (!findMatch15b(myString).equals("")) {
+                            match = findMatch15b(myString);
+
+                        }
+                    }
+                } else if (!findMatch16(myString).equals("")) {
+                    match = findMatch16(myString);
+                } else if (!findMatch17a(myString).equals("")) {
+                    sementara = findMatch17a(myString);
+                    if (cekKata(sementara)) {
+                        match = sementara;
+                    } else {
+                        sementara = findMatch17b(myString);
+                        if (cekKata(sementara)) {
+                            match = sementara;
+                        } else if (!findMatch17c(myString).equals("")) {
+                            sementara = findMatch17c(myString);
+                            if (cekKata(sementara)) {
+                                match = sementara;
+                            } else if (!findMatch17d(myString).equals("")) {
+
+                                match = findMatch17d(myString);
+
+                            }
+
+                        }
+                    }
+                } else if (!findMatch18a(myString).equals("")) {
+                    sementara = findMatch18a(myString);
+                    if (cekKata(sementara)) {
+                        match = sementara;
+                    } else {
+                        if (!findMatch18b(myString).equals("")) {
+                            match = findMatch18b(myString);
+
+                        }
+                    }
+                } else if (!findMatch19(myString).equals("")) {
+                    match = findMatch19(myString);
+                } else if (!findMatch20(myString).equals("")) {
+                    match = findMatch20(myString);
+                } else if (!findMatch21a(myString).equals("")) {
+                    sementara = findMatch21a(myString);
+                    if (cekKata(sementara)) {
+                        match = sementara;
+                    } else {
+                        if (!findMatch21b(myString).equals("")) {
+                            match = findMatch21b(myString);
+
+                        }
+                    }
+                } else if (!findMatch23(myString).equals("")) {
+                    match = findMatch23(myString);
+                } else if (!findMatch24(myString).equals("")) {
+                    match = findMatch24(myString);
+                } else if (!findMatch25(myString).equals("")) {
+                    match = findMatch25(myString);
+                } else if (!findMatch26a(myString).equals("")) {
+                    sementara = findMatch26a(myString);
+                    if (cekKata(sementara)) {
+                        match = sementara;
+                    } else {
+                        if (!findMatch26b(myString).equals("")) {
+                            match = findMatch26b(myString);
+
+                        }
+                    }
+                } else if (!findMatch27(myString).equals("")) {
+                    match = findMatch27(myString);
+                } else if (!findMatch28a(myString).equals("")) {
+                    sementara = findMatch28a(myString);
+                    if (cekKata(sementara)) {
+                        match = sementara;
+                    } else {
+                        if (!findMatch28b(myString).equals("")) {
+                            match = findMatch28b(myString);
+
+                        }
+                    }
+                } else if (!findMatch29(myString).equals("")) {
+                    return findMatch29(myString);
+                } else if (!findMatch30a(myString).equals("")) {
+                    sementara = findMatch30a(myString);
+                    if (cekKata(sementara)) {
+                        match = sementara;
+                    } else {
+                        sementara = findMatch30b(myString);
+                        if (cekKata(sementara)) {
+                            match = sementara;
+                        } else if (!findMatch30c(myString).equals("")) {
+
+                            match = findMatch30c(myString);
+
+                        }
+                    }
+                } else if (!findMatch31a(myString).equals("")) {
+                    sementara = findMatch31a(myString);
+                    if (cekKata(sementara)) {
+                        match = sementara;
+                    } else {
+                        if (!findMatch31b(myString).equals("")) {
+                            match = findMatch31b(myString);
+
+                        }
+                    }
+                } else if (!findMatch32(myString).equals("")) {
+                    match = findMatch32(myString);
+                } else if (!findMatch34(myString).equals("")) {
+                    match = findMatch34(myString);
+                } else if (!findMatch35(myString).equals("")) {
+                    match = findMatch35(myString);
+                } else if (!findMatch36(myString).equals("")) {
+                    match = findMatch36(myString);
+                } else if (!findMatch37a(myString).equals("")) {
+                    sementara = findMatch37a(myString);
+                    if (cekKata(sementara)) {
+                        match = sementara;
+                    } else {
+                        if (!findMatch37b(myString).equals("")) {
+                            match = findMatch37b(myString);
+
+                        }
+                    }
+                } else if (!findMatch38a(myString).equals("")) {
+                    sementara = findMatch38a(myString);
+                    if (cekKata(sementara)) {
+                        match = sementara;
+                    } else {
+                        if (!findMatch38b(myString).equals("")) {
+                            match = findMatch38b(myString);
+
+                        }
+                    }
+                } else if (!findMatch39a(myString).equals("")) {
+                    sementara = findMatch39a(myString);
+                    if (cekKata(sementara)) {
+                        match = sementara;
+                    } else {
+                        if (!findMatch39b(myString).equals("")) {
+                            match = findMatch39b(myString);
+
+                        }
+                    }
+                } else if (!findMatch40a(myString).equals("")) {
+                    sementara = findMatch40a(myString);
+                    if (cekKata(sementara)) {
+                        match = sementara;
+                    } else {
+                        if (!findMatch40b(myString).equals("")) {
+                            match = findMatch40b(myString);
+
+                        }
+                    }
+                } else if (!findMatch41(myString).equals("")) {
+                    match = findMatch41(myString);
+                } else if (!findMatch42(myString).equals("")) {
+                    match = findMatch42(myString);
                 }
-            } else if (!findMatch32(myString).equals("")) {
-                match = findMatch32(myString);
-            } else if (!findMatch34(myString).equals("")) {
-                match = findMatch34(myString);
-            } else if (!findMatch35(myString).equals("")) {
-                match = findMatch35(myString);
-            } else if (!findMatch36(myString).equals("")) {
-                match = findMatch36(myString);
-            }
+
         }
-
 
         return match;
     }
@@ -2488,16 +2551,23 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
                 "^pe(.*)i$",
                 "^ter(.*)i$"};
         String pattern1 = "^me(.*)kan$";
-
-
-        String pattern[] = {"^ber(.*)i$",
+        String pattern[] = {"^be(.*)i$",
                 "^di(.*)an$",
                 "^ke(.*)i$",
-                "^ke(.*)an$",
+                "^ke(.*)kan$",
                 "^me(.*)an$",
-                "^me(.*)an$",
-                "^ter(.*)an$",
-                "^per(.*)an$",};
+                "^se(.*)i$",
+                "^se(.*)kan$",
+                "^te(.*)an$"};
+
+//        String pattern[] = {"^ber(.*)i$",
+//                "^di(.*)an$",
+//                "^ke(.*)i$",
+//                "^ke(.*)kan$",
+//                "^me(.*)an$",
+//                "^me(.*)an$",
+//                "^ter(.*)an$",
+//                "^per(.*)an$",};
         boolean statusCheck = true;
         int i=0;
         int count=0;
@@ -2514,9 +2584,66 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
         else {
             if (kata.equals("ketahui")) {
                 match = kata;
-            } else {
-                while (statusCheck ) {
-                    if(i < pattern.length)
+            }
+            else if(kata.equals("kebijakan"))
+            {
+                match = "bijak";
+            }
+            else if(kata.equals("setelah"))
+            {
+                match = "telah";
+            }
+            else if(kata.equals("senilai"))
+            {
+                match = "nilai";
+            }
+            else if(kata.equals("sehari"))
+            {
+                match = "hari";
+            }
+            else if(kata.equals("perbaikan"))
+            {
+                match = "baik";
+            }
+            else if(kata.equals("memperoleh"))
+            {
+                match = "oleh";
+            }
+            else if(kata.equals("sejumlah"))
+            {
+                match = "jumlah";
+            }
+            else if(kata.equals("peneliti"))
+            {
+                match = "teliti";
+            }
+            else if(kata.equals("mengantisipasi"))
+            {
+                match = "antisipasi";
+            }
+            else if(kata.equals("berjumlah"))
+            {
+                match = "jumlah";
+            }
+            else if(kata.equals("terdiri"))
+            {
+                match = "diri";
+            }
+            else if(kata.equals("sepekan"))
+            {
+                match = "pekan";
+            }
+            else if(kata.equals("berjalan"))
+            {
+                match = "jalan";
+            }
+            else if(kata.equals("Sejumlah"))
+            {
+                match = "jumlah";
+            }
+            else {
+                while (true) {
+                    if(i >= pattern.length)
                     {
                         break;
                     }
@@ -2549,11 +2676,12 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
         else
         {
 
-            String hsl = checkValidImbuhan(kataku);
-            Log.i("hasil",hsl);
-            if(cekKata(hsl)) {
-                status=true;
-            }
+                String hsl = checkValidImbuhan(kataku);
+                Log.i("hasil", hsl);
+                if (cekKata(hsl)) {
+                    status = true;
+                }
+
         }
 
         return status;
@@ -2569,8 +2697,8 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
         //create progress dialog
         super.onPreExecute();
         pDialog = new ProgressDialog(ActiveActivity);
-        pDialog.setMessage("Mengambil Data dari Server...");
-//        pDialog.show();
+        pDialog.setMessage("Sedang dipersiapkan...");
+        pDialog.show();
 
     }
 
