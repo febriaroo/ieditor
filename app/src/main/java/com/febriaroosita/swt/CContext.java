@@ -35,6 +35,8 @@ public class CContext {
 
     public ArrayList<VisitorInterface> prefixVisitors;
 
+    public CheckSisipan ceksisipan;
+
     public String result;
     public CContext(String originalWord, VisitorProvider vp, Context pass){
         kata = new DbKata(pass);
@@ -48,7 +50,7 @@ public class CContext {
         suffixVisitors = new ArrayList<VisitorInterface>();
         prefixVisitors = new ArrayList<VisitorInterface>();
         removals = new ArrayList<RemovalInterface>();
-
+        ceksisipan = new CheckSisipan();
         initVisitor();
 
 
@@ -163,6 +165,7 @@ public class CContext {
         {
             return;
         }
+
         // step 4, 5
         this.removePrefixes();
         for(int i=0;i<this.removals.size();i++) {
@@ -181,6 +184,8 @@ public class CContext {
         {
             return;
         }
+
+       // this.cekSisipan();
         // ECS loop pengembalian akhiran
         this.loopPengembalianAkhiran();
     }
@@ -341,6 +346,11 @@ public class CContext {
 
             removals.remove(tempRemove.get(j));
         }
+    }
+
+    public void cekSisipan()
+    {
+        this.ceksisipan.cekSisipan(this.currentWord);
     }
 
 
