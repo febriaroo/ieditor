@@ -18,15 +18,17 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        <!--<activity-->
-            <!--android:name=".cobamenyanyi"-->
-            <!--android:label="@string/app_name" >-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN" />-->
 
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
-        <!--</activity>-->
+        <!-- <activity -->
+        <!-- android:name=".cobamenyanyi" -->
+        <!-- android:label="@string/app_name" > -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="android.intent.action.MAIN" /> -->
+
+
+        <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+        <!-- </intent-filter> -->
+        <!-- </activity> -->
         <activity
             android:name=".SplashScreenActivity"
             android:label="@string/app_name" >
@@ -113,7 +115,10 @@
             android:name=".settingActivity"
             android:label="@string/title_activity_setting" >
         </activity>
-
+        <activity
+            android:name=".tanpaCheckActivity"
+            android:label="@string/title_activity_tanpa_check" >
+        </activity>
     </application>
 
 </manifest>

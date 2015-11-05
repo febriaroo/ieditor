@@ -12,4 +12,5 @@
     <string name="title_activity_landingpage">Landingpage</string>
     <string name="title_activity_setting">settingActivity</string>
     <string name="title_activity_cobamenyanyi">cobamenyanyi</string>
+    <string name="title_activity_tanpa_check">tanpaCheckActivity</string>
 </resources>

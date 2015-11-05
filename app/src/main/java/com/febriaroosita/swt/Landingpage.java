@@ -44,6 +44,8 @@ import io.filepicker.Filepicker;
 
 public class Landingpage extends ActionBarActivity{
     int FILE_CODE=1;
+
+    int Position=0;
     ArrayAdapter documentlistAdapter;
     private static final int REQUEST_CODE = 6384;
     private static final int CREATE_REQUEST_CODE = 40;
@@ -138,14 +140,42 @@ public class Landingpage extends ActionBarActivity{
         setTitle("iEditor");
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setIcon(R.mipmap.ic_launcher);
+
         listDocument.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent ii = new Intent(Landingpage.this, MainActivity.class);
-                ii.putExtra("FilePath", path.get(position));
-                ii.putExtra("status", "open");
-                startActivity(ii);
-                finish();
+                Position = position;
+                final String mSelectedItems;  // Where we track the selected items
+                AlertDialog.Builder builder = new AlertDialog.Builder(parent.getContext());
+                // Set the dialog title
+
+                builder.setTitle("Apakah anda ingin dokumen anda dilakukan pengecekan?")
+                        // Specify the list array, the items to be selected by default (null for none),
+                        // and the listener through which to receive callbacks when items are selected
+
+                                // Set the action buttons
+                        .setPositiveButton("Ya", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                Intent ii = new Intent(Landingpage.this, MainActivity.class);
+                                ii.putExtra("FilePath", path.get(Position));
+                                ii.putExtra("status", "open");
+                                startActivity(ii);
+                                finish();
+                            }
+                        })
+                        .setNegativeButton("Tidak", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id) {
+                                Intent ii = new Intent(Landingpage.this, tanpaCheckActivity.class);
+                                ii.putExtra("FilePath", path.get(Position));
+                                ii.putExtra("status", "open");
+                                startActivity(ii);
+                                finish();
+                            }
+                        });
+                builder.show();
+
             }
         });
     }
