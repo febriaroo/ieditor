@@ -5,6 +5,9 @@ package com.febriaroosita.swt;
  */
 public class RemoveInflectionalParticle implements VisitorInterface
 {
+    //km cariapa ko //oh cuma ngecek algo e // kyk e sing paling ngefek waktu aku ambil kata dari editor trs tak masukin
+    //ke pengecekan, itu dimana ya? oh disini, pas ngetik apa pas ngeload open?
+    //disaat pengecekanmu jalan pokok e.. mau dari ngetik ae ngeload, yg manggil
     public void visit(CContext context)
     {
         String result = this.remove(context.currentWord.toLowerCase());

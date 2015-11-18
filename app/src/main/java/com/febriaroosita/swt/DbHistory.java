@@ -87,6 +87,8 @@ public class DbHistory extends SQLiteOpenHelper {
         Cursor cursor =  db.rawQuery( "select * from "+TABLE_NAME+" where "+COLUMNS[1]+"='"+kata.toLowerCase()+"'", null );
         if(cursor.moveToFirst())
         {
+            if(cursor != null)
+                cursor.close();
             return true;
             //data.id_kata = cursor.getInt(0);
             //data.kata = cursor.getString(1);
@@ -101,10 +103,10 @@ public class DbHistory extends SQLiteOpenHelper {
         CKata data = new CKata();
 
         Cursor cursor =  db.rawQuery( "select jumlah_digunakan from "+TABLE_NAME+" where "+COLUMNS[1]+"='"+kata.toLowerCase()+"'", null );
+        int temp=0;
         if(cursor.moveToFirst())
         {
-
-            return cursor.getInt(0);
+            temp= cursor.getInt(0);
             //data.id_kata = cursor.getInt(0);
             //data.kata = cursor.getString(1);
         }
@@ -112,7 +114,7 @@ public class DbHistory extends SQLiteOpenHelper {
             cursor.close();
 
 
-        return 0;
+        return temp;
     }
     public boolean insertData (SQLiteDatabase db, CHistory data)
     {
@@ -139,7 +141,8 @@ public class DbHistory extends SQLiteOpenHelper {
             data.weight = cursor.getDouble(2);
             data.tanggal = cursor.getString(3);
             data.jumlah_digunakan = cursor.getInt(4);
-
+            if(cursor != null)
+                cursor.close();
             //"id_kata", "kata", "weight", "tanggal", "Jumlah_digunakan"
         }
 
@@ -196,6 +199,7 @@ public class DbHistory extends SQLiteOpenHelper {
     {
         ArrayList<CHistory> array_list = new ArrayList<CHistory>();
         //hp = new HashMap();
+
         Cursor cursor =  db.rawQuery( "select * from "+TABLE_NAME +"",null  );
         cursor.moveToFirst();
         while(cursor.isAfterLast() == false){
@@ -209,6 +213,8 @@ public class DbHistory extends SQLiteOpenHelper {
             array_list.add(data);
             cursor.moveToNext();
         }
+        if(cursor != null)
+            cursor.close();
         return array_list;
     }
 }

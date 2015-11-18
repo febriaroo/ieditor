@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.GridView;
@@ -11,6 +12,18 @@ import android.widget.Toast;
 
 import com.daimajia.numberprogressbar.NumberProgressBar;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.Hits;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.store.RAMDirectory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,6 +39,11 @@ public class DownloadKataTask extends AsyncTask<String, Integer, Boolean>
 {
     ProgressDialog pDialog;
     Activity ActiveActivity;
+
+    //lucene
+    Directory directory;
+    IndexWriter indexWriter;
+    Analyzer analyzer;
 
     public GridView gridViewBudaya;
     public ArrayList<CKata> arrayListBudaya;
@@ -73,7 +91,10 @@ public class DownloadKataTask extends AsyncTask<String, Integer, Boolean>
             is.read(buffer);
 
             is.close();
+            directory = new RAMDirectory();
 
+            analyzer= new StandardAnalyzer();
+            indexWriter = null;
             json = new String(buffer, "UTF-8");
             String result=json;
             if(result != null)
@@ -95,20 +116,45 @@ public class DownloadKataTask extends AsyncTask<String, Integer, Boolean>
                         Log.i("tes",result);
 
                         JSONArray jsonbudaya = obj.getJSONArray("data");
-
+                        String sql = "INSERT INTO kata (id_kata,kata,tipe, jumlah_digunakan) VALUES (?, ?, ?, ?)";
+                        SQLiteStatement stmt = db.compileStatement(sql);
+                        db.beginTransaction();
+                        indexWriter = new IndexWriter(directory, analyzer,
+                                true);
                         for(int i=0; i<jsonbudaya.length(); i++)
                         {
                             JSONObject objbudaya = jsonbudaya.getJSONObject(i);
-                            CKata budaya = new CKata();
+
+                            Document doc = new Document();
+                            doc.add(new Field("fieldname", objbudaya.getString("kata"), Field.Store.YES,
+                                    Field.Index.TOKENIZED));
+                            indexWriter.addDocument(doc);
+                            /*CKata budaya = new CKata(); //wah kok ada aync task e.. dimana ne?
                             budaya.id_kata = objbudaya.getInt("id_kata");
                             budaya.kata = objbudaya.getString("kata");
                             budaya.tipe = objbudaya.getString("tipe");
                             budaya.jumlah = 0;
                             //arrayListBudaya.add(budaya);
-                            DBKata.insertData(db, budaya);
+                            DBKata.insertData(db, budaya);*/
+                            stmt.clearBindings();
+                            stmt.bindLong(1, objbudaya.getInt("id_kata"));
+                            stmt.bindString(2, objbudaya.getString("kata"));
+                            stmt.bindString(3, objbudaya.getString("tipe"));
+                            stmt.bindLong(4, 0);
+                            stmt.execute();
                             int p=i*100/jsonbudaya.length();
                             publishProgress(p);
                         }
+
+
+                        //directory = new FSDirectory().openInput("");
+
+                        indexWriter.optimize();
+                        indexWriter.close();
+
+
+                        db.setTransactionSuccessful();
+                        db.endTransaction();
                         return true;
                     }
                     else if(obj.getInt("status") == 0)
@@ -134,48 +180,6 @@ public class DownloadKataTask extends AsyncTask<String, Integer, Boolean>
         }
         return false;
     }
-
-    /*
-    * @Override
-    protected String doInBackground(String... urls) {
-        // TODO Auto-generated method stub
-        StringBuilder builder = new StringBuilder();
-        HttpClient client = new DefaultHttpClient();
-        HttpGet httpGet = new HttpGet(urls[0]);
-
-        try {
-            HttpResponse response = client.execute(httpGet);
-            StatusLine statusLine = response.getStatusLine();
-            int statusCode = statusLine.getStatusCode();
-            if (statusCode == 200) {
-                String message;
-                HttpEntity entity = response.getEntity();
-                InputStream content = entity.getContent();
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(content));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    builder.append(line);
-                }
-                message = builder.toString();
-                // Log.i("datakata",message);
-                return message;
-                //Log.v("Getter", "Your data: " + builder.toString()); //response data
-            } else {
-                Log.e("failed", "1");
-                //Log.e("Getter", "Failed to download file");
-                return null;
-            }
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-            Log.e("failed","2");
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.e("failed", "3");
-        }
-
-        return null;
-    }*/
 
     @Override
     protected void onPostExecute(Boolean result) {

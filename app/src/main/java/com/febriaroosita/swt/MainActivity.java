@@ -27,6 +27,18 @@ import android.widget.ListView;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.Toast;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.FuzzyQuery;
+import org.apache.lucene.search.Hits;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.RAMDirectory;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.usermodel.CharacterRun;
 import org.apache.poi.hwpf.usermodel.Paragraph;
@@ -86,6 +98,10 @@ public class MainActivity extends ActionBarActivity {
     private static final int REQUEST_CODE = 6384;
     private static final int REQUEST_CHOOSER =123 ;
     private static EditText textView;
+    Directory directory= new RAMDirectory();
+    IndexWriter indexWriter = null;
+    Analyzer analyzer = new StandardAnalyzer();
+
 
     private static final int CREATE_REQUEST_CODE = 40;
     private static final int OPEN_REQUEST_CODE = 41;
@@ -145,10 +161,35 @@ public class MainActivity extends ActionBarActivity {
             String [] l=s.toString().split(" ");
             String kirim=l[l.length-1];
        if(posisi.size()!=0) {
-           kaataku=kataku.getAllKataHistory(db,kirim);
-           kaataku=kataku.CekLev(kaataku,kirim);
-           adapter = new ArrayAdapter<String>(MainActivity.this,android.R.layout.simple_list_item_1,kaataku);
-           myText.setAdapter(adapter);
+           try {
+               IndexSearcher indexSearcher = new IndexSearcher(directory);
+               QueryParser parser = new QueryParser("fieldname", analyzer);
+
+               String myQuery = kata.toString();
+               Term term = new Term("fieldname", myQuery);
+               Query query = new FuzzyQuery(term,0.1f);
+               Hits hits = indexSearcher.search(query);
+
+               for (int i = 0; i < hits.length(); i++) {
+                   Document hitDoc = hits.doc(i);
+                   kaataku.add(hitDoc.get("fieldname"));
+                   Log.i("LuceneActivity", "Lucene: " + hitDoc.get("fieldname"));
+                   ;
+               }
+
+               indexSearcher.close();
+               //kaataku = kataku.getAllKataHistory(db, kata);
+               adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, kaataku);
+               myText.setAdapter(adapter);
+               ((ArrayAdapter) myText.getAdapter()).notifyDataSetChanged();
+           } catch (Exception e)
+           {
+               Log.e("lucene error",e.getMessage());
+           }
+           //kaataku=kataku.getAllKataHistory(db,kirim);
+           //kaataku=kataku.CekLev(kaataku,kirim);
+           //adapter = new ArrayAdapter<String>(MainActivity.this,android.R.layout.simple_list_item_1,kaataku);
+           //myText.setAdapter(adapter);
        }
         }
         public void afterTextChanged(Editable s) {
@@ -157,7 +198,7 @@ public class MainActivity extends ActionBarActivity {
             if(s.length()>1)
             {
                 if (s.length() == 0) {
-                    kaataku=kataku.getAllKataHistory(db,"");
+                    kaataku=kataku.getAllKataHistory(db, "");
                 } else{
                     Log.i("start", "start: " + start1);
                     Log.i("before", "before: " + before1);
@@ -174,11 +215,31 @@ public class MainActivity extends ActionBarActivity {
                             //Log.i("hasilku",splitku[splitku.length-1]);
 
                             String kata = splitku[splitku.length - 1];
-                            kaataku = kataku.getAllKataHistory(db, kata);
-                            adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, kaataku);
-                            myText.setAdapter(adapter);
-                            ((ArrayAdapter) myText.getAdapter()).notifyDataSetChanged();
+                            try {
+                                IndexSearcher indexSearcher = new IndexSearcher(directory);
+                                QueryParser parser = new QueryParser("fieldname", analyzer);
 
+                                String myQuery = kata.toString();
+                                Term term = new Term("fieldname", myQuery);
+                                Query query = new FuzzyQuery(term,0.1f);
+                                Hits hits = indexSearcher.search(query);
+
+                                for (int i = 0; i < hits.length(); i++) {
+                                    Document hitDoc = hits.doc(i);
+                                    kaataku.add(hitDoc.get("fieldname"));
+                                    Log.i("LuceneActivity", "Lucene: " + hitDoc.get("fieldname"));
+                                    ;
+                                }
+
+                                indexSearcher.close();
+                                //kaataku = kataku.getAllKataHistory(db, kata);
+                                adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, kaataku);
+                                myText.setAdapter(adapter);
+                                ((ArrayAdapter) myText.getAdapter()).notifyDataSetChanged();
+                            } catch (Exception e)
+                            {
+                                Log.e("lucene error",e.getMessage());
+                            }
                         }
                     }
                     else
@@ -237,10 +298,37 @@ public class MainActivity extends ActionBarActivity {
                                         int jum_kata=kataku.getJumKata(db,kata);
                                         jum_kata++;
                                         kataku.updateJumData(db, jum_kata, kata);
-                                        kaataku=kataku.getAllKataHistory(db, all);
-                                        adapter = new ArrayAdapter<String>(MainActivity.this,android.R.layout.simple_list_item_1,kaataku);
-                                        myText.setAdapter(adapter);
-                                        ((ArrayAdapter) myText.getAdapter()).notifyDataSetChanged();
+                                        //kaataku=kataku.getAllKataHistory(db, all);
+                                        //adapter = new ArrayAdapter<String>(MainActivity.this,android.R.layout.simple_list_item_1,kaataku);
+                                        //myText.setAdapter(adapter);
+
+                                        try {
+                                            IndexSearcher indexSearcher = new IndexSearcher(directory);
+                                            QueryParser parser = new QueryParser("fieldname", analyzer);
+
+                                            String myQuery = kata.toString();
+                                            Term term = new Term("fieldname", myQuery);
+                                            Query query = new FuzzyQuery(term,0.1f);
+                                            Hits hits = indexSearcher.search(query);
+
+                                            for (int i = 0; i < hits.length(); i++) {
+                                                Document hitDoc = hits.doc(i);
+                                                kaataku.add(hitDoc.get("fieldname"));
+                                                Log.i("LuceneActivity", "Lucene: " + hitDoc.get("fieldname"));
+                                                ;
+                                            }
+
+                                            indexSearcher.close();
+                                            //kaataku = kataku.getAllKataHistory(db, kata);
+                                            adapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_list_item_1, kaataku);
+                                            myText.setAdapter(adapter);
+                                            ((ArrayAdapter) myText.getAdapter()).notifyDataSetChanged();
+                                        } catch (Exception e)
+                                        {
+                                            Log.e("lucene error",e.getMessage());
+                                        }
+
+                                        //((ArrayAdapter) myText.getAdapter()).notifyDataSetChanged();
 
                                     }
 
@@ -375,9 +463,7 @@ public class MainActivity extends ActionBarActivity {
                 Log.i("filepath", filePath);
                 try {
                     if (!filePath.isEmpty() && check.equals("open")) {
-                      //  Toast.makeText(MainActivity.this, filePath, Toast.LENGTH_LONG).show();
 
-                        //  Log.i("masuk","ini masuk");
                         String kyaa = "Dokumen Baru";
                         String[] paat = filePath.split("/storage/emulated/0/");
                         if (paat.length >= 1) {
@@ -601,6 +687,14 @@ public class MainActivity extends ActionBarActivity {
                 // Write your code here to invoke NO event
                 //Toast.makeText(getApplicationContext(), "You clicked on NO", Toast.LENGTH_SHORT).show();
                 dialog.cancel();
+            }
+        });
+
+        alertDialog.setNeutralButton("Tidak simpan",new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                // Write your code here to invoke NO event
+                //Toast.makeText(getApplicationContext(), "You clicked on NO", Toast.LENGTH_SHORT).show();
+                finish();
             }
         });
 

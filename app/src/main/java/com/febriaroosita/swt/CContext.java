@@ -122,10 +122,7 @@ public class CContext {
         }
 
         CPrecedenceAdjustmentSpecification csPrecedenceAdjustmentSpecification = new CPrecedenceAdjustmentSpecification();
-        /*
-         * Confix Stripping
-         * Try to remove prefix before suffix if the specification is met
-         */
+
         if (csPrecedenceAdjustmentSpecification.isSatisfiedBy(this.originalWord)) {
             // step 4, 5
             this.removePrefixes();
@@ -147,7 +144,6 @@ public class CContext {
                         }
                     }
                 }
-
             }
             if(cekKata(this.currentWord))
             {
@@ -185,8 +181,6 @@ public class CContext {
             return;
         }
 
-       // this.cekSisipan();
-        // ECS loop pengembalian akhiran
         this.loopPengembalianAkhiran();
     }
 
@@ -306,23 +300,14 @@ public class CContext {
             Log.i("lagi lagi error", this.currentWord);
         }
     }
-    /**
-     * Check wether the removed part is a suffix
-     *
-     * @param  \Sastrawi\Stemmer\Context\RemovalInterface $removal
-     * @return boolean
-     */
+
     protected boolean isSuffixRemoval(RemovalInterface removal)
     {
         return removal.getAffixType() == "DS"
                 || removal.getAffixType() == "PP"
                 || removal.getAffixType() == "P";
     }
-    /**
-     * Restore prefix to proceed with ECS loop pengembalian akhiran
-     *
-     * @return void
-     */
+
     public void restorePrefix()
     {
         int i= 0;

@@ -5,6 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -24,7 +27,11 @@ public class DbKata extends SQLiteOpenHelper {
         // TODO Auto-generated method stub
         db.execSQL(
                 "create table if not exists " + TABLE_NAME +
-                        "(id_kata integer primary key, kata text,jumlah_digunakan integer, tipe text)"
+                        "(id_kata integer primary key, kata text  primary key,jumlah_digunakan integer, tipe text)"
+        );
+        db.execSQL(
+                "create table if not exists tempsalah" +
+                        "(id_kata integer primary key, kata text, weight double, tanggal date, Jumlah_digunakan integer)"
         );
 
     }
@@ -35,7 +42,7 @@ public class DbKata extends SQLiteOpenHelper {
        // db.execSQL("drop table if exists " + TABLE_NAME );
         db.execSQL(
                 "create table if not exists " + TABLE_NAME +
-                        "(id_kata integer primary key, kata text,jumlah_digunakan integer, tipe text)"
+                        "(id_kata integer primary key, kata text  primary key,jumlah_digunakan integer, tipe text)"
         );
     }
 
@@ -67,22 +74,16 @@ public class DbKata extends SQLiteOpenHelper {
         db.insert(TABLE_NAME, null, contentValues);
         return true;
     }
+
     public boolean getDataByKata(SQLiteDatabase db, String kata){
-        CKata data = new CKata();
+        //CKata data = new CKata(); g dipake
 
         Cursor cursor =  db.rawQuery( "select * from "+TABLE_NAME+" where "+COLUMNS[1]+"='"+kata.toLowerCase()+"'", null );
-        if(cursor.moveToFirst())
-        {
-            if(cursor != null)
-                cursor.close();
-            return true;
-            //data.id_kata = cursor.getInt(0);
-            //data.kata = cursor.getString(1);
-        }
-        if(cursor != null)
+        if(cursor != null && cursor.moveToFirst()) {
             cursor.close();
-
-
+            return true;
+        }
+        cursor.close();
         return false;
     }
     public Integer getJumKata(SQLiteDatabase db, String kata){
@@ -126,6 +127,7 @@ public class DbKata extends SQLiteOpenHelper {
     public String getCekKataVowel(SQLiteDatabase db, String kata){
         CKata data = new CKata();
         String myKata = "%".concat("kata");
+
         Cursor cursor =  db.rawQuery( "select kata from "+TABLE_NAME+" where "+COLUMNS[1]+"='"+myKata.toLowerCase()+"'", null );
         if(cursor.moveToFirst())
         {
@@ -306,6 +308,52 @@ public class DbKata extends SQLiteOpenHelper {
         return array_list;
 
     }
+
+    /*private void quickSort(int lowerIndex, int higherIndex) {
+
+        int i = lowerIndex;
+        int j = higherIndex;
+        int pivot = tempint[lowerIndex+(higherIndex-lowerIndex)/2];
+        int temp;
+        while (i <= j) {
+            while (tempint[i] < pivot) {
+                i++;
+            }
+            while (tempint[j] > pivot) {
+                j--;
+            }
+            if(tempint[i] == pivot || tempint[j] == pivot || tempint[i] == tempint[j])
+            {
+                if(jum.get(meme[i])>jum.get(meme[j]) || jum.get(meme[i]) > jum.get(meme[lowerIndex+(higherIndex-lowerIndex)/2]))
+                {
+                    temp = tempint[i];
+                    tempint[i] = tempint[j];
+                    tempint[j] = temp;
+                }
+                continue;
+            }
+            if (i <= j) {
+                temp = tempint[i];
+                tempint[i] = tempint[j];
+                tempint[j] = temp;
+
+                temp=meme[i];
+                meme[i]=meme[j];
+                meme[j]=temp;
+
+                i++;
+                j--;
+            }
+        }
+        if (lowerIndex < j)
+            quickSort(lowerIndex, j);
+        if (i < higherIndex)
+            quickSort(i, higherIndex);
+    }*/
+
+    //private static int[] tempint;
+    //private static int[] meme;
+    //private static ArrayList<Integer> jum;
     public ArrayList<String> getAllKataHistory(SQLiteDatabase db,String s)
     {
         ArrayList<String> array_list = new ArrayList<String>();
@@ -325,8 +373,8 @@ public class DbKata extends SQLiteOpenHelper {
             i++;
         }
         int me;
-        int [] meme=new int[i];
-        int [] tempint=new int[i];
+        int []meme=new int[i];
+        int []tempint=new int[i];
         for(int j=0;j<i;j++)
         {
             me=LevenshteinDistance(array_list.get(j),s);
@@ -339,6 +387,42 @@ public class DbKata extends SQLiteOpenHelper {
         //urutin
         String [] temp=new String[i];
         int y;
+        for(int j=0; j<i; j++)
+        {
+            for(int k=j; k>0; k--)
+            {
+                if(tempint[k] < tempint[k-1])
+                {
+                    y = tempint[k];
+                    tempint[k] = tempint[k-1];
+                    tempint[k-1] = y;
+
+                    y = meme[k];
+                    meme[k] = meme[k-1];
+                    meme[k-1] = y;
+                }
+                else if(tempint[k] == tempint[k-1])
+                {
+                    if(jum.get(meme[k])>jum.get(meme[k-1]))
+                    {
+                        y = tempint[k];
+                        tempint[k] = tempint[k-1];
+                        tempint[k-1] = y;
+
+                        y = meme[k];
+                        meme[k] = meme[k-1];
+                        meme[k-1] = y;
+                    }
+                }
+            }
+        }
+        for(int j=0; j<i; j++)
+        {
+            Log.i(String.valueOf(j),
+                    String.valueOf(tempint[j]));
+        }
+        //quickSort(0, tempint.length-1);
+        /*int y;
         for(int j=0;j<i;j++)
         {
             for(int k=0;k<i-1;k++)
@@ -355,7 +439,8 @@ public class DbKata extends SQLiteOpenHelper {
                 }
                 else if(tempint[j]==tempint[k])
                 {
-                    if(jum.get(meme[j])>jum.get(meme[k]))
+                    if(jum.get(meme[j])>jum.get(meme[k])) //ini wajib ya? klo kembar aku mesti cek ini? bntr ko aq lp ini buat opo
+                    //oh ini buat klo distace e sm, diliat jumlah e klo jumlah e sg stue lebi akeh, diutuker posisine
                     {
                         y=tempint[j];
                         tempint[j]=tempint[k];
@@ -368,7 +453,7 @@ public class DbKata extends SQLiteOpenHelper {
                 }
             }
 
-        }
+        }*/
         for(int j=0;j<i;j++)
         {
             array_list_temp.add(array_list.get(meme[j]));

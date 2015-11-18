@@ -11,6 +11,13 @@ import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.widget.EditText;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.RAMDirectory;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.usermodel.CharacterRun;
 import org.apache.poi.hwpf.usermodel.Paragraph;
@@ -22,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,12 +43,16 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
     String allText;
 
     DbKata kata;
+
     String par;
     ArrayList<CKata> myKata;
     private EditText ma;
     String filePath;
     Context pass;
 
+    Directory directory;
+    IndexWriter indexWriter;
+    Analyzer analyzer;
 
     // public CBudayaAdapter budayaAdapter;
     DbHistory his;
@@ -49,14 +61,20 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
 
     public SQLiteDatabase db;
     public SQLiteDatabase db1;
+    public SQLiteDatabase dbtemp1;
     public DbKata DBKata;
+    public DBtemp dbtemp;;
     public SpellingCheckerTask (Activity pass)
     {
         ActiveActivity=pass;
         DBKata = new DbKata(pass);
+        dbtemp = new DBtemp(pass);
         his=new DbHistory(pass);
         db = DBKata.getWritableDatabase();
+
+        dbtemp1 = dbtemp.getWritableDatabase();
         db1 = his.getWritableDatabase();
+        dbtemp.createtable(dbtemp1);
     }
 
     public int distanceKata(String kata1, String kata2){
@@ -129,6 +147,7 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
             }
         }
         //cek akhiran particles
+        //inni yang lama, oo trus passing ke fungsi barumu dimana ya?
         if (cekAkhiran3.equals("kah")||cekAkhiran3.equals("lah")||cekAkhiran3.equals("pun")) {
             dasar1 = dasar;
             dasar1 = dasar1.substring(awal, len - 3);
@@ -664,12 +683,87 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
         }
         return false;
     }
+    public boolean cekKataHistoriBaru(String kataku)
+    {
+        if(his.getJumKata(db1, kataku.toLowerCase())>0)
+        {
+            return true;
+
+        }
+        return false;
+    }
+    public boolean cekSalahKata(String kataku)
+    {
+        if(dbtemp.getJumKata(dbtemp1, kataku.toLowerCase())>0)
+        {
+            return true;
+
+        }
+        return false;
+    }
+    public void addKataHistory(String kataku)
+    {
+        CHistory ne=new CHistory();
+        ne.id_kata=his.getJumDB(db)+1;
+        ne.jumlah_digunakan=his.getJumKata(db1, kataku);
+        ne.kata=kataku;
+        Date a =new Date();
+        ne.tanggal = a.toString();
+        ne.weight = 0.0;
+
+        directory = new RAMDirectory();
+
+        analyzer= new StandardAnalyzer();
+        indexWriter = null;
+        //directory = new FSDirectory().openInput("");
 
 
-    public boolean stemming(String kataku)
+        if(his.getJumKata(db1,kataku)==0)
+        {
+            ne.jumlah_digunakan = 1;
+                his.insertData(db1, ne);
+
+            try {
+                indexWriter = new IndexWriter(directory, analyzer,
+                        true);
+
+                Document doc = new Document();
+                doc.add(new Field("fieldname", kataku, Field.Store.YES,
+                        Field.Index.TOKENIZED));
+                indexWriter.addDocument(doc);
+
+                indexWriter.optimize();
+                indexWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+    public void addKataTemp(String kataku)
+    {
+        CHistory ne=new CHistory();
+        ne.id_kata=dbtemp.getJumDB(dbtemp1)+1;
+        ne.jumlah_digunakan=dbtemp.getJumKata(dbtemp1, kataku);
+        ne.kata=kataku;
+        Date a =new Date();
+        ne.tanggal = a.toString();
+        ne.weight = 0.0;
+        if(dbtemp.getJumKata(dbtemp1,kataku)==0)
+        {
+            ne.jumlah_digunakan = 1;
+            dbtemp.insertData(dbtemp1, ne);
+
+        }
+
+    }
+
+
+    public boolean stemming(String kataku) //
     {
         boolean status=false;
-
         int awal = 0;
         int akhir1 = 3;//untuk yang jumlahnya 2 huruf
         int akhir2 = 2;//untuk yang jumlahnya 3 huruf
@@ -677,9 +771,9 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
         int akhiran1;
         // ^[a-zA-Z]+$
         stemming a = new stemming(ActiveActivity);
+        long startTime = System.nanoTime();
 
         try{
-
             //check angka
             Double bee = Double.parseDouble(kataku);
             status = true;
@@ -690,8 +784,15 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
                 status =true;
             }
             String temp = kataku.replaceAll("[^A-Za-z0-9]","").toLowerCase();
-
-            if(cekKata(a.stem(temp)) )
+            if(cekKataHistoriBaru(temp))
+            {
+                status=true;
+            }
+            else if(cekSalahKata(temp))
+            {
+                status = false;
+            }
+            else if(cekKata(a.stem(temp)) )
             {
                 status = true;
 
@@ -702,6 +803,14 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
             //status = startStemming(kataku);
 
         }
+        long endTime = System.nanoTime();
+
+        long duration = (endTime - startTime)/1000000;
+        if(duration>10)
+        {
+            Log.i("duration-text", kataku);
+        }
+        Log.i("duration", Long.toString(duration));
         return status;
     }
 
@@ -2274,6 +2383,8 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
         super.onPreExecute();
         pDialog = new ProgressDialog(ActiveActivity);
         pDialog.setMessage("Sedang dipersiapkan...");
+        pDialog.setCancelable(false);
+        pDialog.setCanceledOnTouchOutside(false);
         pDialog.show();
 
     }
@@ -2361,7 +2472,27 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
                     if (!stemming(kata))
                     {
                         myText.setSpan(new UnderlineSpan(), firstChar,lastChar, 0);
+                        if(!cekSalahKata(kata.toLowerCase()))
+                        {
+                            addKataTemp(kata.toLowerCase());
+                        }
+                        else {
 
+                            dbtemp.updateDatacount(dbtemp1,kata.toLowerCase(),dbtemp.getJumKata(dbtemp1,kata.toLowerCase())+1);
+                        }
+
+                    }
+                    else if(!cekKata(kata.toLowerCase()) && !cekKataHistoriBaru(kata.toLowerCase()) )
+                    {
+                        addKataHistory(kata.toLowerCase());
+                    }
+                    else if(!cekKata(kata.toLowerCase()) && cekKataHistoriBaru(kata.toLowerCase()))
+                    {
+                        his.updateDatacount(db1,kata.toLowerCase(),his.getJumKata(db1,kata.toLowerCase())+1);
+                    }
+                    else {
+
+                        dbtemp.updateDatacount(dbtemp1,kata.toLowerCase(),dbtemp.getJumKata(dbtemp1,kata.toLowerCase())+1);
                     }
                     //myText.setSpan(new UnderlineSpan(), firstChar,lastChar, 0);
                 }

@@ -39,6 +39,7 @@ public class DownloadHistoryTask extends AsyncTask<String, Void, String>
 
     public SQLiteDatabase db;
     public DbHistory DBHistory;
+    public DBtemp dbtem;
     public DownloadHistoryTask(Activity pass)
     {
         ActiveActivity=pass;
@@ -116,6 +117,13 @@ public class DownloadHistoryTask extends AsyncTask<String, Void, String>
                         Toast.makeText(ActiveActivity, "dbnya ada kok", Toast.LENGTH_SHORT).show();
                         Log.i("Database ada","Ada kok databasenya");
                         DBHistory.deleteAllData(db);
+                    }
+                    if(dbtem.cektabelexist(db))
+                    {
+
+                        Toast.makeText(ActiveActivity, "dbnya ada kok", Toast.LENGTH_SHORT).show();
+                        Log.i("Database ada","Ada kok databasenya");
+                        dbtem.deleteAllData(db);
                     }
 
                     JSONArray jsonbudaya = obj.getJSONArray("data");

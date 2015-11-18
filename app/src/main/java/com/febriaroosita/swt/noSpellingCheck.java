@@ -29,34 +29,6 @@ import java.util.regex.Pattern;
  * Created by febria on 11/4/15.
  */
 
-        import android.app.Activity;
-        import android.app.ProgressDialog;
-        import android.content.Context;
-        import android.database.sqlite.SQLiteDatabase;
-        import android.os.AsyncTask;
-        import android.os.Environment;
-        import android.text.SpannableString;
-        import android.text.style.UnderlineSpan;
-        import android.util.Log;
-        import android.widget.EditText;
-
-        import org.apache.poi.hwpf.HWPFDocument;
-        import org.apache.poi.hwpf.usermodel.CharacterRun;
-        import org.apache.poi.hwpf.usermodel.Paragraph;
-
-        import java.io.File;
-        import java.io.FileInputStream;
-        import java.io.FileNotFoundException;
-        import java.io.FileOutputStream;
-        import java.io.IOException;
-        import java.io.OutputStream;
-        import java.util.ArrayList;
-        import java.util.regex.Matcher;
-        import java.util.regex.Pattern;
-
-/**
- * Created by Febria on 5/13/2015.
- */
 public class noSpellingCheck extends AsyncTask<String, Void, SpannableString>
 {
     ProgressDialog pDialog;
@@ -175,31 +147,6 @@ public class noSpellingCheck extends AsyncTask<String, Void, SpannableString>
         myText = new SpannableString(allText);
         //stemming(allText);
         return myText;
-//        while(ketemu){
-//            int pos=getPositionFromSeparator(firstChar);
-//
-//            if(pos == -1){
-//                ketemu = false;
-//            }
-//            else{
-//                lastChar = pos;
-//                if(!cekKataPos(firstChar, lastChar)){
-//                    //cek stemming
-//                    String kata=getKataSub(firstChar, lastChar);
-//                    //kalau ada didatabase return true, kalo tidak return false
-//                    if (!stemming(kata))
-//                    {
-//                        myText.setSpan(new UnderlineSpan(), firstChar,lastChar, 0);
-//
-//                    }
-//                    //myText.setSpan(new UnderlineSpan(), firstChar,lastChar, 0);
-//                }
-//                firstChar = lastChar+1;
-//            }
-//        }
-//
-//        return myText;
-
     }
 
     @Override

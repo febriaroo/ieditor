@@ -182,6 +182,7 @@ public class Landingpage extends ActionBarActivity{
     public void DownloadDataKata() {
         Log.i("makan","saya makan");
         DownloadKataTask task = new DownloadKataTask(Landingpage.this);
+        //cari insert ke db
         String url = "openKata.json";
         Log.i("makan","saya makan");
         task.execute(url);

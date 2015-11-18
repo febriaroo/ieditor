@@ -84,9 +84,9 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
 
     public boolean checkKataFromDB(String kataku) {
 
-        boolean kataAda = kata.getDataByKata(db, kataku);
-
-        return kataAda;
+        //boolean kataAda = kata.getDataByKata(db, kataku);
+        // return kataAda;
+        return kata.getDataByKata(db, kataku);
     }
 
     public boolean cekKataPos(int pos, int end) {
@@ -1835,7 +1835,7 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
         return false;
 
     }
-
+//prosesnya yang ini, ada algo yang lama belum tak apus wkwkkw
     public boolean stemming(String kataku)
     {
         boolean status=false;

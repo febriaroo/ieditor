@@ -332,34 +332,7 @@ public class tanpaCheckActivity extends ActionBarActivity {
             }
         });
         ((ArrayAdapter) myText.getAdapter()).notifyDataSetChanged();
-//        if(session.isLoggedIn())
-//        {
-//            EditText myText1=(EditText)findViewById(R.id.machine);
-//            myText.setVisibility(View.GONE);
-//            myText1.setVisibility(View.VISIBLE);
-//        }
 
-        /*my Text.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-
-
-            public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-
-                                    long arg3) {
-                //nambahi jumlah digunakan
-                int jum_kata = kataku.getJumKata(db, arg0.getItemAtPosition(arg2).toString());
-                Log.i("kata", arg0.getItemAtPosition(arg2).toString());
-                Log.i("jumlahkata", "jumlah kata:" + jum_kata);
-                jum_kata++;
-                kataku.updateJumData(db, jum_kata, arg0.getItemAtPosition(arg2).toString());
-
-
-            }
-
-
-        });
-*/
-        //end punya rekomendasi
         Fileku = new DbFile(tanpaCheckActivity.this);
 
         db1 =Fileku.getWritableDatabase();
@@ -445,6 +418,10 @@ public class tanpaCheckActivity extends ActionBarActivity {
                     //  setTitle(new_file);
                 }
             }
+
+
+
+
             //getActionBar().setIcon(R.drawable.my_icon);
         }
         catch (NullPointerException e)
