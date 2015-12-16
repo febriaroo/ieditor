@@ -1,12 +1,15 @@
 package com.febriaroosita.swt;
 
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
@@ -14,9 +17,13 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AlertDialog;
 import android.text.Editable;
+import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.StyleSpan;
+import android.text.style.TypefaceSpan;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,6 +37,7 @@ import android.widget.Toast;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryParser.QueryParser;
@@ -159,7 +167,14 @@ public class MainActivity extends ActionBarActivity {
         public void onTextChanged(CharSequence s, int start, int before, int count) {
            //terminateToken(s);
             String [] l=s.toString().split(" ");
-            String kirim=l[l.length-1];
+            String kirim;
+            try{
+
+                 kirim=l[l.length-1];
+            } catch (ArrayIndexOutOfBoundsException e)
+            {
+                kirim = l[l.length];
+            }
        if(posisi.size()!=0) {
            try {
                IndexSearcher indexSearcher = new IndexSearcher(directory);
@@ -420,7 +435,104 @@ public class MainActivity extends ActionBarActivity {
                 return false;
             }
         });
-        ((ArrayAdapter) myText.getAdapter()).notifyDataSetChanged();
+        myText.setCustomSelectionActionModeCallback(new ActionMode.Callback() {
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                // TODO Auto-generated method stub
+                // Remove the "select all" option
+                menu.removeItem(android.R.id.selectAll);
+                // Remove the "cut" option
+                menu.removeItem(android.R.id.cut);
+                // Remove the "copy all" option
+                menu.removeItem(android.R.id.copy);
+                menu.removeItem(android.R.id.paste);
+
+
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                // TODO Auto-generated method stub
+                menu.add(0, 1, 0, "Salah ketik");
+                menu.add(0, 2, 0, "Ini benar");
+                menu.add(0, 3, 0, "Abaikan");
+
+                return true;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                // TODO Auto-generated method stub
+                int min;
+                int max;
+                Log.i("select masuk","masuk select");
+                switch (item.getItemId()) {
+                    case 1:
+                         min = 0;
+                         max = myText.getText().length();
+                        if (myText.isFocused()) {
+                            final int selStart = myText.getSelectionStart();
+                            final int selEnd = myText.getSelectionEnd();
+
+                            min = Math.max(0, Math.min(selStart, selEnd));
+                            max = Math.max(0, Math.max(selStart, selEnd));
+                        }
+                        // Perform your definition lookup with the selected text
+                        myText.setSelection(min);
+                        // Finish and close the ActionMode
+                        mode.finish();
+                        return true;
+                    case 2:
+                        SpannableString myText1 = new SpannableString(myText.getText());
+                         min = 0;
+                         max = myText.getText().length();
+                        if (myText.isFocused()) {
+                            final int selStart = myText.getSelectionStart();
+                            final int selEnd = myText.getSelectionEnd();
+
+                            min = Math.max(0, Math.min(selStart, selEnd));
+                            max = Math.max(0, Math.max(selStart, selEnd));
+                        }
+                        // Perform your definition lookup with the selected text
+                        final CharSequence selectedText = myText.getText().subSequence(min, max);
+
+                        UnderlineSpan [] buang = myText1.getSpans(min,max,UnderlineSpan.class);
+                        if(buang.length>0) {
+                            myText1.removeSpan(buang[0]);
+                        }
+                        myText.setText(myText1);
+                        addKataHistory(selectedText.toString());
+                        cekKataLagi(selectedText.toString(),min,max);
+                        // Finish and close the ActionMode
+                        mode.finish();
+                        // add your custom code to get cut functionality according
+                        // to your requirement
+                        return true;
+                    case 3: //abaikan
+
+                        SpannableString myText2 = new SpannableString(myText.getText());
+                        myText.setText(myText2);
+                        // add your custom code to get paste functionality according
+                        // to your requirement
+                        return true;
+
+                    default:
+                        exitByBackKey();
+                        break;
+                }
+                return false;
+            }
+        });
+
+    ((ArrayAdapter) myText.getAdapter()).notifyDataSetChanged();
 //        if(session.isLoggedIn())
 //        {
 //            EditText myText1=(EditText)findViewById(R.id.machine);
@@ -465,17 +577,27 @@ public class MainActivity extends ActionBarActivity {
                     if (!filePath.isEmpty() && check.equals("open")) {
 
                         String kyaa = "Dokumen Baru";
-                        String[] paat = filePath.split("/storage/emulated/0/");
+                        String [] paat={};
+                        if(filePath.contains("/storage/emulated/0/")) {
+                            paat = filePath.split("/storage/emulated/0/");
+                        }
+                        else if (filePath.contains(getFilesDir().toString()))
+                        {
+                            paat = filePath.split(getFilesDir().toString()+"/");
+                        }
                         if (paat.length >= 1) {
                             kyaa = paat[1];
                         }
                         setTitle(kyaa);
+                        //String isi = ;
+                        myText.setText(getisiDoc(filePath));
                         CheckingFile(filePath);
                     }
                     else if (!check.isEmpty() && check.equals("drive")) {
                         new_file = apa.getStringExtra("namefile");
+
                         filePath = "/storage/emulated/0/ieditor/" + new_file;
-                        setNew_file(filePath);
+                        setNew_file(filePath,filePath);
                         setTitle(new_file);
 
                         String isi = apa.getStringExtra("isiDoc");
@@ -490,13 +612,13 @@ public class MainActivity extends ActionBarActivity {
                         if (!check.isEmpty() && check.equals("new_file")) {
                             new_file = apa.getStringExtra("namefile");
                             filePath = "/storage/emulated/0/ieditor/" + new_file;
-                            setNew_file(new_file);
+                            setNew_file(new_file,filePath);
                             setTitle(new_file);
                             //  setTitle(new_file);
                         } else if (!check.isEmpty() && check.equals("drive")) {
                             new_file = apa.getStringExtra("namefile");
                             filePath = "/storage/emulated/0/ieditor/" + new_file;
-                            setNew_file(filePath);
+                            setNew_file(filePath,filePath);
                             setTitle(new_file);
 
                             String isi = apa.getStringExtra("isiDoc");
@@ -508,7 +630,7 @@ public class MainActivity extends ActionBarActivity {
                         new_file = apa.getStringExtra("namefile");
                         String isi = apa.getStringExtra("isiDoc");
                         filePath = "/storage/emulated/0/ieditor/" + new_file;
-                        setNew_file(new_file);
+                        setNew_file(new_file,filePath);
                         setTitle(new_file);
                         myText.setText(isi);
                     }
@@ -523,7 +645,7 @@ public class MainActivity extends ActionBarActivity {
                     new_file = apa.getStringExtra("namefile");
 
                     filePath = "/storage/emulated/0/ieditor/" + new_file;
-                    setNew_file(new_file);
+                    setNew_file(new_file,filePath);
                     setTitle(new_file);
 
                     String isi = apa.getStringExtra("isiDoc");
@@ -542,14 +664,23 @@ public class MainActivity extends ActionBarActivity {
                 if (!check.isEmpty() && check.equals("new_file")) {
                     new_file = apa.getStringExtra("namefile");
                     filePath = "/storage/emulated/0/" + new_file;
+                    Log.i("internal",getFilesDir().toString());
+                    if(getFilesDir().toString().equals("/storage/emulated/0/"))
+                    {
+                        filePath = "/storage/emulated/0/" + new_file;
+                    }
+                    else {
+                        filePath = getFilesDir().getPath().toString()+ "/" + new_file;
+                    }
+
                     //filePath = "/storage/emulated/0/ieditor/" + new_file;
-                    setNew_file(new_file);
+                    setNew_file(new_file,filePath);
                     setTitle(new_file);
                     //  setTitle(new_file);
                 } else if (!check.isEmpty() && check.equals("drive")) {
                     new_file = apa.getStringExtra("namefile");
                     filePath = "/storage/emulated/0/ieditor/" + new_file;
-                    setNew_file(new_file);
+                    setNew_file(new_file,filePath);
                     setTitle(new_file);
 
                     String isi = apa.getStringExtra("isiDoc");
@@ -563,14 +694,14 @@ public class MainActivity extends ActionBarActivity {
                 new_file = apa.getStringExtra("namefile");
                 String isi = apa.getStringExtra("isiDoc");
                 filePath = "/storage/emulated/0/ieditor/" + new_file;
-                setNew_file(new_file);
+                setNew_file(new_file,filePath);
                 setTitle(new_file);
                 myText.setText(isi);
             }
         }
 
     }
-    public void setNew_file(String FileName)
+    public void setNew_file(String FileName, String myPath)
     {
         //Environment.get
        // File sdCard = getBaseContext().getFilesDir();
@@ -583,17 +714,36 @@ public class MainActivity extends ActionBarActivity {
         File dir;
         if(!dir11.exists())
         {
-            dir = new File(sdCard.getAbsolutePath() +"/" + "ieditor/"+FileName);
+            dir = new File(getFilesDir() +"/" +FileName);
         }
         else {
             if(!dir11.mkdirs())
             {
                 //gagal
                 dir = new File(sdCard.getAbsolutePath() +"/" + FileName);
+                if(dir.exists())
+                {
+                    //berhasil dibuat
+                    Log.i("exsit","file sukse dibuat");
+                }
+                else
+                {
+                    dir = new File(getFilesDir() + "/"+FileName);
+                }
             }
             else
             {
                 dir = new File(sdCard.getAbsolutePath() +"/" + "ieditor/"+FileName);
+                if(dir.exists())
+                {
+                    //berhasil dibuat
+                    Log.i("exsit","file sukse dibuat");
+                }
+                else
+                {
+                    dir = new File(getFilesDir() + "/"+FileName);
+                }
+
             }
         }
 
@@ -616,8 +766,15 @@ public class MainActivity extends ActionBarActivity {
             OutputStream out = new FileOutputStream(dir);
             a.write(out);
             out.close();
-
-            String temp[]=filePath.split("/storage/emulated/0/");
+            String[] temp = {};
+            Log.i("filepath", filePath);
+            if (dir.getPath().contains("/storage/emulated/0/")) {
+                temp = dir.getPath().split("/storage/emulated/0/");
+            }
+            else if (dir.getPath().contains(getFilesDir().toString()))
+            {
+                temp = dir.getPath().split(getFilesDir().toString());
+            }
             if(Fileku.cektabelexist(db1)) {
                 if (!Fileku.getFileName(db1, temp[1])) {
                     DateFormat dateFormatter = new SimpleDateFormat("MMM dd hh.mm");
@@ -643,17 +800,166 @@ public class MainActivity extends ActionBarActivity {
             e.printStackTrace();
         }
     }
+    public int getPositionFromSeparator(int firstChar)
+    {
+        //postBefore buat bandingin sama yang sebelomnya
+        int posBefore=-1;
+        //ascii 32-47
+        //58-64
+        //91-96
+        //123-126
+        //posEnter != -1 && (posEnter < pos || pos == -1)
+        for(int i=32;i<=47;i++)
+        {
+            int pos = par.indexOf((char)i,firstChar);
+            if(pos != -1 && (pos < posBefore|| posBefore== -1))
+            {
+                posBefore=pos;
+            }
+        }
+        for(int i=58;i<=64;i++)
+        {
+            int pos = par.indexOf((char)i,firstChar);
+            if(pos != -1 && (posBefore > pos || posBefore == -1))
+            {
+                posBefore=pos;
+            }
+        }
+        for(int i=91;i<=96;i++)
+        {
+            int pos = par.indexOf((char)i,firstChar);
+            if(pos != -1 && (posBefore > pos || posBefore == -1))
+            {
+                posBefore=pos;
+            }
+        }
+        for(int i=123;i<=126;i++)
+        {
+            int pos = par.indexOf((char)i,firstChar);
+            if(pos != -1 && (posBefore > pos || posBefore == -1))
+            {
+                posBefore=pos;
+            }
+        }
+        int pos = par.indexOf("\t",firstChar);
+        if(pos != -1 && (posBefore > pos || posBefore == -1))
+        {
+            posBefore=pos;
+        }
+        pos = par.indexOf("\r",firstChar);
+        if(pos != -1 && (posBefore > pos || posBefore == -1))
+        {
+            posBefore=pos;
+        }
+        pos = par.indexOf("\n",firstChar);
+        if(pos != -1 && (posBefore > pos || posBefore == -1))
+        {
+            posBefore=pos;
+        }
+        return posBefore;
+    }
 
     public void CheckingFile(String url) {
         SpellingCheckerTask task = new SpellingCheckerTask(MainActivity.this);
        // Log.i("urlnya", url);
         task.execute(url);
 
+
+
+    }
+    public SpannableString getisiDoc(String data)
+    {
+        long startTime = System.nanoTime();
+        // TODO Auto-generated method stub
+        SpannableString myspan;
+        String semuaDataPath= (data);
+
+        String[] parts = semuaDataPath.split("/storage/emulated/0/");
+        File sdCard = Environment.getExternalStorageDirectory();
+        Log.i("testing",semuaDataPath);
+        Log.i("testing",parts[0]);
+        File dir1 = new File(data);
+        File dir = new File(data);
+        SpannableString myText = null;
+        FileInputStream aa=null;
+        try {
+            aa = new FileInputStream(dir);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        HWPFDocument a= null;
+        try {
+            a = new HWPFDocument(aa);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Paragraph hwPar;
+        org.apache.poi.hwpf.usermodel.Range range = a.getRange();
+        ;
+        Paragraph paragraph = range.getParagraph(0);
+        // Log.i("mytag", a.getText().toString());
+
+        //ini diganti sementara
+        String allText=a.getText().toString();
+        //allText="menyanyi";
+        par=allText;
+        //aaa.createParagraph;
+        CharacterRun charRun = paragraph.insertBefore("");
+        charRun.setBold(true);
+        charRun.setFontSize(32);
+        OutputStream out = null;
+        try {
+            out = new FileOutputStream(dir1);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            a.write(out);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        int firstChar = 0;
+        int lastChar = -1;
+        boolean ketemu = true;
+
+        SpannableString myte = new SpannableString(allText);
+        long endTime = System.nanoTime();
+        //satuannya second
+        long duration = (endTime - startTime)/(long)1000000000.0;
+
+        Log.i("duration all", Long.toString(duration));
+        //dur =  Long.toString(duration);
+        //stemming(allText);
+
+        return myte;
+
     }
     public void CheckingFiledrive(String all) {
         Spelingfordrive task = new Spelingfordrive(MainActivity.this);
         // Log.i("urlnya", url);
         task.execute(all);
+        String temp ="";
+
+        if(task.getStatus() == AsyncTask.Status.PENDING){
+            // My AsyncTask has not started yet
+        }
+
+        if(task.getStatus() == AsyncTask.Status.RUNNING){
+            // My AsyncTask is currently doing work in doInBackground()
+            temp = myText.getText().toString();
+        }
+
+        if(task.getStatus() == AsyncTask.Status.FINISHED){
+            // My AsyncTask is done and onPostExecute was called
+            myText.setText(myText.getText() + temp);
+
+        }
 
     }
 
@@ -672,7 +978,7 @@ public class MainActivity extends ActionBarActivity {
         //alertDialog.setIcon(R.drawable.delete);
 
         // Setting Positive "Yes" Button
-        alertDialog.setPositiveButton("Ya dan Simpan", new DialogInterface.OnClickListener() {
+        alertDialog.setPositiveButton("Ya, Simpan", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 simpan();
 
@@ -694,6 +1000,8 @@ public class MainActivity extends ActionBarActivity {
             public void onClick(DialogInterface dialog, int which) {
                 // Write your code here to invoke NO event
                 //Toast.makeText(getApplicationContext(), "You clicked on NO", Toast.LENGTH_SHORT).show();
+                Intent ii = new Intent(getApplicationContext(), Landingpage.class);
+                startActivity(ii);
                 finish();
             }
         });
@@ -702,6 +1010,66 @@ public class MainActivity extends ActionBarActivity {
         alertDialog.show();
 
     }
+
+    public void addKataHistory(String kataku)
+    {
+
+        DbHistory his=new DbHistory(this);
+
+         SQLiteDatabase db2;
+        db2 = his.getWritableDatabase();
+        CHistory ne=new CHistory();
+        ne.id_kata=his.getJumDB(db)+1;
+        ne.jumlah_digunakan=his.getJumKata(db1, kataku);
+        ne.kata=kataku;
+        Date a =new Date();
+        ne.tanggal = a.toString();
+        ne.weight = 0.0;
+
+        directory = new RAMDirectory();
+
+        analyzer= new StandardAnalyzer();
+        indexWriter = null;
+        //directory = new FSDirectory().openInput("");
+
+
+        if(his.getJumKata(db1,kataku)==0)
+        {
+            ne.jumlah_digunakan = 1;
+            his.insertData(db2, ne);
+
+            try {
+                indexWriter = new IndexWriter(directory, analyzer,
+                        true);
+
+                Document doc = new Document();
+                doc.add(new Field("fieldname", kataku, Field.Store.YES,
+                        Field.Index.TOKENIZED));
+                indexWriter.addDocument(doc);
+
+                indexWriter.optimize();
+                indexWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+    public void cekKataLagi(String kataku,int min,int max)
+    {
+
+        SpellingWords a=new SpellingWords(MainActivity.this,min,max);
+        //directory = new FSDirectory().openInput("");
+
+
+
+
+    }
+
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -710,9 +1078,15 @@ public class MainActivity extends ActionBarActivity {
     }
     public void simpan()
     {
+        String[] parts = {};
         Log.i("filepath",filePath);
-        String[] parts = filePath.split("/storage/emulated/0/");
-
+        if(filePath.contains("/storage/emulated/0/")) {
+            parts = filePath.split("/storage/emulated/0/");
+        }
+        else if (filePath.contains(getFilesDir().toString()))
+        {
+            parts = filePath.split(getFilesDir().toString());
+        }
         String mPart=filePath;
         if(parts.length>=1)
         {
@@ -722,7 +1096,7 @@ public class MainActivity extends ActionBarActivity {
         File sdCard = Environment.getExternalStorageDirectory();
         File dir = new File(sdCard.getAbsolutePath() + "/ee.doc");
         File dir11 = new File(String.valueOf(sdCard));
-        File stu= new File(sdCard.getAbsolutePath()+"/" +mPart);
+        File stu= new File(filePath);
         if (dir11.exists()) {
 
         } else {
@@ -809,13 +1183,7 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            Intent a=new Intent(MainActivity.this,settingActivity.class);
 
-            a.putExtra("data",myText.getText().toString());
-            startActivity(a);
-            return true;
-        }
         if(id == R.id.action_drive)
         {
             saveFile();

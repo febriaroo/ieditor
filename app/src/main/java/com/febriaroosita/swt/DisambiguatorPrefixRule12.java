@@ -7,21 +7,13 @@ import java.util.regex.Pattern;
  */
 public class DisambiguatorPrefixRule12 implements DisambiguatorInterface
 {
-    /**
-     * Disambiguate Prefix Rule 12
-     * Nazief and Adriani Original Rule 12 : mempe{r|l} -> mem-pe{r|l}
-     * Modified by Jelita Asian's CS Rule 12 : mempe -> mem-pe to stem mempengaruhi
-     */
     public String disambiguate(String word)
     {
         String match = "";
 
-        // Pattern to find code
-        String pattern = "^mempe(.*)$";  // Sequence of 8 digits'
-
+        String pattern = "^mempe(.*)$";
         Pattern regEx = Pattern.compile(pattern);
 
-        // Find instance of pattern matches
         Matcher m = regEx.matcher(word);
         if (m.find()) {
             match="pe"+m.group(1);

@@ -7,20 +7,13 @@ import java.util.regex.Pattern;
  */
 public class DisambiguatorPrefixRule18b implements DisambiguatorInterface
 {
-    /**
-     * Disambiguate Prefix Rule 18b
-     * Original Rule 18 : menyV -> meny-sV
-     * Modified by CC (shifted into 18b, see also 18a)
-     */
+
     public String disambiguate(String word){
         String match = "";
 
-        // Pattern to find code
-        String pattern = "^meny([aiueo])(.*)$";  // Sequence of 8 digits'
-
+        String pattern = "^meny([aiueo])(.*)$";
         Pattern regEx = Pattern.compile(pattern);
 
-        // Find instance of pattern matches
         Matcher m = regEx.matcher(word);
         if (m.find()) {
             match="s"+m.group(1)+m.group(2);

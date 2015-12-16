@@ -7,20 +7,14 @@ import java.util.regex.Pattern;
  */
 public class DisambiguatorPrefixRule6a implements DisambiguatorInterface {
     /**
-     * Disambiguate Prefix Rule 6a
-     * Rule 6a : terV -> ter-V
-     *
-     * @return string
+     *  6a : terV -> ter-V
      */
     public String disambiguate(String word) {
         String match = "";
 
-        // Pattern to find code
-        String pattern = "^ter([aiueo].*)$";  // Sequence of 8 digits'
-
+        String pattern = "^ter([aiueo].*)$";
         Pattern regEx = Pattern.compile(pattern);
 
-        // Find instance of pattern matches
         Matcher m = regEx.matcher(word);
         if (m.find()) {
             match = m.group(1);

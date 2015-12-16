@@ -8,15 +8,12 @@ import java.util.regex.Pattern;
 public class DisambiguatorPrefixRule24 implements DisambiguatorInterface
 {
     /**
-     * Disambiguate Prefix Rule 24
      * Rule 24 : perCAerV -> per-CAerV where C != 'r'
      */
     public String disambiguate(String word){
         String match = "";
 
-        // Pattern to find code
-        String pattern = "^per([bcdfghjklmnpqrstvwxyz])([a-z])er([aiueo])(.*)$";  // Sequence of 8 digits'
-
+        String pattern = "^per([bcdfghjklmnpqrstvwxyz])([a-z])er([aiueo])(.*)$"; 
         Pattern regEx = Pattern.compile(pattern);
         Matcher m = regEx.matcher(word);
         if (m.find()) {

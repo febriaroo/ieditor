@@ -8,18 +8,10 @@ import java.util.regex.Pattern;
  */
 public class DisambiguatorPrefixRule31b  implements DisambiguatorInterface
 {
-    /**
-     * Disambiguate Prefix Rule 31b
-     * Original Rule 31 : penyV -> peny-sV
-     * Modified by CC, shifted to 31b
-     */
     public String disambiguate(String word)
     {
         String match = "";
-
-        // Pattern to find code
-        String pattern = "^peny([aiueo])(.*)$";  // Sequence of 8 digits'
-
+        String pattern = "^peny([aiueo])(.*)$";
         Pattern regEx = Pattern.compile(pattern);
         Matcher m = regEx.matcher(word);
         if (m.find()) {

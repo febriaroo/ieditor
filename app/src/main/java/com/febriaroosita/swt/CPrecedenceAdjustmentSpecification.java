@@ -10,12 +10,6 @@ public class CPrecedenceAdjustmentSpecification {
 
     public boolean isSatisfiedBy(String kata)
     {
-        String pattern2[] = {"^be(.*)lah$",
-                "^be(.*)an$",
-                "^me(.*)i$",
-                "^di(.*)i$",
-                "^pe(.*)i$",
-                "^ter(.*)i$"};
         String pattern1 = "^me(.*)kan$";
         String patterns[] = {"^be(.*)lah$",
                 "^be(.*)an$",
@@ -27,7 +21,6 @@ public class CPrecedenceAdjustmentSpecification {
         boolean statusCheck = true;
         int i=0;
         int count=0;
-
         String match = "";
         for(String pattern:patterns)
         {
@@ -41,6 +34,5 @@ public class CPrecedenceAdjustmentSpecification {
             }
         }
         return false;
-
     }
 }

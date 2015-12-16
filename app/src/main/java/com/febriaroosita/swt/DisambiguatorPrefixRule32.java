@@ -9,8 +9,7 @@ import java.util.regex.Pattern;
 public class DisambiguatorPrefixRule32  implements DisambiguatorInterface
 {
     /**
-     * Disambiguate Prefix Rule 32
-     * Rule 32 : pelV -> pe-lV except pelajar -> ajar
+     *  32 : pelV -> pe-lV except pelajar -> ajar
      */
     public String disambiguate(String word)
     {
@@ -20,9 +19,7 @@ public class DisambiguatorPrefixRule32  implements DisambiguatorInterface
             match="ajar";
         }
         else {
-            // Pattern to find code
-            String pattern = "^pe(l[aiueo])(.*)$";  // Sequence of 8 digits'
-
+            String pattern = "^pe(l[aiueo])(.*)$";
             Pattern regEx = Pattern.compile(pattern);
             Matcher m = regEx.matcher(word);
             if (m.find()) {

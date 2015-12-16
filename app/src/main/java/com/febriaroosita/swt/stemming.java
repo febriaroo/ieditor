@@ -25,10 +25,7 @@ public class stemming {
 
     public String stem(String word)
     {
-        if(word.equals("amarah"))
-        {
-             return "marah";
-        }
+
         String stems = stemWord(word);
 
         return stems;
@@ -46,12 +43,11 @@ public class stemming {
     protected boolean isPlural(String word)
     {
         // -ku|-mu|-nya
-        // nikmat-Ku, etc
+        // nikmat-Ku
 
         String match = "";
 
-        // Pattern to find code
-        String pattern = "^(.*)-(ku|mu|nya|lah|kah|tah|pun)";  // Sequence of 8 digits'
+        String pattern = "^(.*)-(ku|mu|nya|lah|kah|tah|pun)";
 
         Pattern regEx = Pattern.compile(pattern);
 
@@ -79,8 +75,7 @@ public class stemming {
     {
         String match = "";
 
-        // Pattern to find code
-        String pattern = "^/^(.*)-(.*)/";  // Sequence of 8 digits'
+        String pattern = "^/^(.*)-(.*)/";
         ArrayList<String> check = null;
         check.add("ku");
         check.add("mu");

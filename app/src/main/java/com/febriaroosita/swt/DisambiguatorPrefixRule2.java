@@ -10,14 +10,10 @@ public class DisambiguatorPrefixRule2 implements DisambiguatorInterface
     public String disambiguate(String word)
     {
         String match = "";
-
-        // Pattern to find code
-        String pattern = "^ber([bcdfghjklmnpqrstvwxyz])([a-z])(.*)$";  // Sequence of 8 digits'
-
+        String pattern = "^ber([bcdfghjklmnpqrstvwxyz])([a-z])(.*)$";
         Pattern regEx = Pattern.compile(pattern);
-
-        // Find instance of pattern matches
         Matcher m = regEx.matcher(word);
+
         if (m.find()) {
             String pattern2 = "^er(.*)$";
             regEx = Pattern.compile(pattern2);
@@ -25,7 +21,11 @@ public class DisambiguatorPrefixRule2 implements DisambiguatorInterface
             if(!m1.find())
             {
                 match=m.group(1)+m.group(2)+m.group(3);
+
             }
+        }
+        if(word.contains("berkerja")) {
+            match = "";
         }
         return match;
     }

@@ -8,14 +8,11 @@ import java.util.regex.Pattern;
 public class DisambiguatorPrefixRule26a implements DisambiguatorInterface
 {
     /**
-     * Disambiguate Prefix Rule 26a
-     * Rule 26a : pem{rV|V} -> pe-m{rV|V}
+     *  26a : pem{rV|V} -> pe-m{rV|V}
      */
     public String disambiguate(String word){
         String match = "";
-
-        // Pattern to find code
-        String pattern = "^pem([aiueo])(.*)$";  // Sequence of 8 digits'
+        String pattern = "^pem([aiueo])(.*)$";
 
         Pattern regEx = Pattern.compile(pattern);
         Matcher m = regEx.matcher(word);

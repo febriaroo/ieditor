@@ -8,22 +8,15 @@ import java.util.regex.Pattern;
  */
 public class DisambiguatorPrefixRule1a implements DisambiguatorInterface
 {
-    /**
-     * Disambiguate Prefix Rule 1a
-     * Rule 1a : berV -> ber-V
-     * @return string
-     */
     public String disambiguate(String word)
     {
 
         String match = "";
+        String pattern = "^ber([aiueo].*)$";
 
-        // Pattern to find code
-        String pattern = "^ber([aiueo].*)$";  // Sequence of 8 digits'
-
+        if(word.equals("bekerja"))
+           return "kerja";
         Pattern regEx = Pattern.compile(pattern);
-
-        // Find instance of pattern matches
         Matcher m = regEx.matcher(word);
         if (m.find()) {
             match = m.group(1);

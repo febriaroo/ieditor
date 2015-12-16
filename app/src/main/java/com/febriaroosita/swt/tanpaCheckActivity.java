@@ -562,7 +562,7 @@ public class tanpaCheckActivity extends ActionBarActivity {
         //alertDialog.setIcon(R.drawable.delete);
 
         // Setting Positive "Yes" Button
-        alertDialog.setPositiveButton("Ya dan Simpan", new DialogInterface.OnClickListener() {
+        alertDialog.setPositiveButton("Ya, Simpan", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 simpan();
 
@@ -577,6 +577,16 @@ public class tanpaCheckActivity extends ActionBarActivity {
                 // Write your code here to invoke NO event
                 //Toast.makeText(getApplicationContext(), "You clicked on NO", Toast.LENGTH_SHORT).show();
                 dialog.cancel();
+            }
+        });
+
+        alertDialog.setNeutralButton("Tidak simpan", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                // Write your code here to invoke NO event
+                //Toast.makeText(getApplicationContext(), "You clicked on NO", Toast.LENGTH_SHORT).show();
+                Intent ii = new Intent(getApplicationContext(), Landingpage.class);
+                startActivity(ii);
+                finish();
             }
         });
 
@@ -691,13 +701,7 @@ public class tanpaCheckActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            Intent a=new Intent(tanpaCheckActivity.this,settingActivity.class);
 
-            a.putExtra("data",myText.getText().toString());
-            startActivity(a);
-            return true;
-        }
         if(id == R.id.action_drive)
         {
             saveFile();

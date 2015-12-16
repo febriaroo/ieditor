@@ -68,7 +68,7 @@ public class noSpellingCheck extends AsyncTask<String, Void, SpannableString>
     }
 
 
-
+    String dur;
     protected void onPreExecute() {
         // TODO Auto-generated method stub
         //create progress dialog
@@ -81,6 +81,8 @@ public class noSpellingCheck extends AsyncTask<String, Void, SpannableString>
 
     @Override
     protected SpannableString doInBackground(String... data) {
+
+        long startTime = System.nanoTime();
         // TODO Auto-generated method stub
         SpannableString myspan;
         String semuaDataPath= (data[0]);
@@ -145,7 +147,14 @@ public class noSpellingCheck extends AsyncTask<String, Void, SpannableString>
         boolean ketemu = true;
 
         myText = new SpannableString(allText);
+        long endTime = System.nanoTime();
+        //satuannya second
+        long duration = (endTime - startTime)/(long)1000000000.0;
+
+        Log.i("duration all", Long.toString(duration));
+        dur =  Long.toString(duration);
         //stemming(allText);
+
         return myText;
     }
 

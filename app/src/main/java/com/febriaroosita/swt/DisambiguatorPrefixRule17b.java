@@ -8,18 +8,15 @@ import java.util.regex.Pattern;
 public class  DisambiguatorPrefixRule17b implements DisambiguatorInterface
 {
     /**
-     * Disambiguate Prefix Rule 17b
-     * Rule 17b : mengV -> meng-kV
+     *  17b : mengV -> meng-kV
      */
     public String disambiguate(String word){
         String match = "";
 
-        // Pattern to find code
-        String pattern = "^meng([aiueo])(.*)$";  // Sequence of 8 digits'
+        String pattern = "^meng([aiueo])(.*)$";
 
         Pattern regEx = Pattern.compile(pattern);
 
-        // Find instance of pattern matches
         Matcher m = regEx.matcher(word);
         if (m.find()) {
             match="k"+m.group(1)+m.group(2);

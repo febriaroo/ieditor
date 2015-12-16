@@ -7,20 +7,13 @@ import java.util.regex.Pattern;
  */
 public class DisambiguatorPrefixRule16 implements DisambiguatorInterface
 {
-    /**
-     * Disambiguate Prefix Rule 16
-     * Original Nazief and Adriani's Rule 16 : meng{g|h|q} -> meng-{g|h|q}
-     * Modified Jelita Asian's CS Rule 16 : meng{g|h|q|k} -> meng-{g|h|q|k} to stem mengkritik
-     */
     public String disambiguate(String word){
         String match = "";
 
-        // Pattern to find code
-        String pattern = "^meng([g|h|q|k])(.*)$";  // Sequence of 8 digits'
+        String pattern = "^meng([g|h|q|k])(.*)$";
 
         Pattern regEx = Pattern.compile(pattern);
 
-        // Find instance of pattern matches
         Matcher m = regEx.matcher(word);
         if (m.find()) {
             match=m.group(1)+m.group(2);

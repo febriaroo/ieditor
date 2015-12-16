@@ -25,11 +25,6 @@ public class RemoveDerivationalSuffix implements VisitorInterface {
             }
         }
     }
-
-    /**
-     * Remove derivational suffix
-     * Added the adopted foreign suffix rule : is|isme|isasi
-     */
     public String removeSuffix(String word)
     {
         return word.replaceAll("(is|isme|isasi|i|kan|an)$", "");

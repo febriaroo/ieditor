@@ -10,6 +10,7 @@ import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -2376,7 +2377,7 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
 
 
 
-
+    String dur = "";
     protected void onPreExecute() {
         // TODO Auto-generated method stub
         //create progress dialog
@@ -2385,13 +2386,15 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
         pDialog.setMessage("Sedang dipersiapkan...");
         pDialog.setCancelable(false);
         pDialog.setCanceledOnTouchOutside(false);
-        pDialog.show();
+        //pDialog.show();
 
     }
 
     @Override
     protected SpannableString doInBackground(String... data) {
         // TODO Auto-generated method stub
+
+        long startTime = System.nanoTime();
         SpannableString myspan;
         String semuaDataPath= (data[0]);
         kata = new DbKata(ActiveActivity);
@@ -2399,13 +2402,24 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
         myKata = kata.getAllData(db);
 
         String[] parts = semuaDataPath.split("/storage/emulated/0/");
+        if(semuaDataPath.contains("/storage/emulated/0/")) {
+            parts = semuaDataPath.split("/storage/emulated/0/");
+        }
+        else if (semuaDataPath.contains(ActiveActivity.getFilesDir().toString()))
+        {
+            parts = semuaDataPath.split(ActiveActivity.getFilesDir().toString());
+        }
+
         File sdCard = Environment.getExternalStorageDirectory();
         Log.i("testing",semuaDataPath);
         Log.i("testing",parts[0]);
         //File dir = new File(sdCard.getAbsolutePath() + "/ieditor/ee.doc");
         //File dir1 = new File(sdCard.getAbsolutePath() + "/ieditor/eekk.doc");
         File dir1 = new File(sdCard.getAbsolutePath()+"/" + parts[1]);
+
         File dir = new File(sdCard.getAbsolutePath() +"/" + parts[1]);
+        semuaDataPath = semuaDataPath.replaceAll("%20"," ");
+        dir = new File(semuaDataPath);
         SpannableString myText = null;
         FileInputStream aa=null;
         try {
@@ -2416,89 +2430,96 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
         HWPFDocument a= null;
         try {
             a = new HWPFDocument(aa);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
             Paragraph hwPar;
             org.apache.poi.hwpf.usermodel.Range range = a.getRange();
             ;
             Paragraph paragraph = range.getParagraph(0);
-           // Log.i("mytag", a.getText().toString());
+            // Log.i("mytag", a.getText().toString());
 
             //ini diganti sementara
             allText=a.getText().toString();
-        //allText="menyanyi";
-        par=allText;
-        //aaa.createParagraph;
-         CharacterRun charRun = paragraph.insertBefore("");
-        charRun.setBold(true);
-        charRun.setFontSize(32);
-        OutputStream out = null;
-        try {
-            out = new FileOutputStream(dir1);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        try {
-            a.write(out);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        int firstChar = 0;
-        int lastChar = -1;
-        boolean ketemu = true;
-
-        myText = new SpannableString(allText);
-        //stemming(allText);
-
-        while(ketemu){
-            int pos=getPositionFromSeparator(firstChar);
-
-            if(pos == -1){
-                ketemu = false;
+            //allText="menyanyi";
+            par=allText;
+            //aaa.createParagraph;
+            CharacterRun charRun = paragraph.insertBefore("");
+            charRun.setBold(true);
+            charRun.setFontSize(32);
+            OutputStream out = null;
+            try {
+                out = new FileOutputStream(dir1);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             }
-            else{
-                lastChar = pos;
-                if(!cekKataPos(firstChar, lastChar)){
-                    //cek stemming
-                    String kata=getKataSub(firstChar, lastChar);
-                    //kalau ada didatabase return true, kalo tidak return false
-                    if (!stemming(kata))
-                    {
-                        myText.setSpan(new UnderlineSpan(), firstChar,lastChar, 0);
-                        if(!cekSalahKata(kata.toLowerCase()))
+            try {
+                a.write(out);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            int firstChar = 0;
+            int lastChar = -1;
+            boolean ketemu = true;
+
+            myText = new SpannableString(allText);
+            //stemming(allText);
+
+            while(ketemu){
+                int pos=getPositionFromSeparator(firstChar);
+
+                if(pos == -1){
+                    ketemu = false;
+                }
+                else{
+                    lastChar = pos;
+                    if(!cekKataPos(firstChar, lastChar)){
+                        //cek stemming
+                        String kata=getKataSub(firstChar, lastChar);
+                        //kalau ada didatabase return true, kalo tidak return false
+                        if (!stemming(kata))
                         {
-                            addKataTemp(kata.toLowerCase());
+                            myText.setSpan(new UnderlineSpan(), firstChar,lastChar, 0);
+                            if(!cekSalahKata(kata.toLowerCase()))
+                            {
+                                addKataTemp(kata.toLowerCase());
+                            }
+                            else {
+
+                                dbtemp.updateDatacount(dbtemp1,kata.toLowerCase(),dbtemp.getJumKata(dbtemp1,kata.toLowerCase())+1);
+                            }
+
+                        }
+                        else if(!cekKata(kata.toLowerCase()) && !cekKataHistoriBaru(kata.toLowerCase()) )
+                        {
+                            addKataHistory(kata.toLowerCase());
+                        }
+                        else if(!cekKata(kata.toLowerCase()) && cekKataHistoriBaru(kata.toLowerCase()))
+                        {
+                            his.updateDatacount(db1,kata.toLowerCase(),his.getJumKata(db1,kata.toLowerCase())+1);
                         }
                         else {
 
                             dbtemp.updateDatacount(dbtemp1,kata.toLowerCase(),dbtemp.getJumKata(dbtemp1,kata.toLowerCase())+1);
                         }
-
+                        //myText.setSpan(new UnderlineSpan(), firstChar,lastChar, 0);
                     }
-                    else if(!cekKata(kata.toLowerCase()) && !cekKataHistoriBaru(kata.toLowerCase()) )
-                    {
-                        addKataHistory(kata.toLowerCase());
-                    }
-                    else if(!cekKata(kata.toLowerCase()) && cekKataHistoriBaru(kata.toLowerCase()))
-                    {
-                        his.updateDatacount(db1,kata.toLowerCase(),his.getJumKata(db1,kata.toLowerCase())+1);
-                    }
-                    else {
-
-                        dbtemp.updateDatacount(dbtemp1,kata.toLowerCase(),dbtemp.getJumKata(dbtemp1,kata.toLowerCase())+1);
-                    }
-                    //myText.setSpan(new UnderlineSpan(), firstChar,lastChar, 0);
+                    firstChar = lastChar+1;
                 }
-                firstChar = lastChar+1;
             }
+            long endTime = System.nanoTime();
+            //satuannya second
+            long duration = (endTime - startTime)/(long)1000000000.0;
+
+            Log.i("duration all", Long.toString(duration));
+            dur =  Long.toString(duration);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+
 
         return myText;
 
@@ -2512,6 +2533,7 @@ public class SpellingCheckerTask extends AsyncTask<String, Void, SpannableString
             //Inflater myInf=new
             EditText ma=(EditText)ActiveActivity.findViewById(R.id.ku);
             ma.setText(result);
+            //ma.setText(dur);
         }
         super.onPostExecute(result);
     }

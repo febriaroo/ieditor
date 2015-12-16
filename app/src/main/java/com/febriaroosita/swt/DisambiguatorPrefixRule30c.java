@@ -8,15 +8,12 @@ import java.util.regex.Pattern;
 public class DisambiguatorPrefixRule30c  implements DisambiguatorInterface
 {
     /**
-     * Disambiguate Prefix Rule 30c
-     * Rule 30a : peng-V -> pengV- where V = 'e'
+     *  30c : penge-V
      */
     public String disambiguate(String word){
         String match = "";
 
-        // Pattern to find code
-        String pattern = "^penge(.*)$";  // Sequence of 8 digits'
-
+        String pattern = "^penge(.*)$";
         Pattern regEx = Pattern.compile(pattern);
         Matcher m = regEx.matcher(word);
         if (m.find()) {

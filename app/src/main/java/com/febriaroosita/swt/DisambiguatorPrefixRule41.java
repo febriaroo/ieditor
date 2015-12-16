@@ -9,16 +9,13 @@ import java.util.regex.Pattern;
 public class DisambiguatorPrefixRule41 implements DisambiguatorInterface
 {
     /**
-     * Disambiguate Prefix Rule 41
      * Rule 41 : kuA -> ku-A
      */
     public String disambiguate(String word)
     {
         String match = "";
 
-        // Pattern to find code
-        String pattern = "^ku(.*)$";  // Sequence of 8 digits'
-
+        String pattern = "^ku(.*)$";
         Pattern regEx = Pattern.compile(pattern);
         Matcher m = regEx.matcher(word);
         if (m.find()) {

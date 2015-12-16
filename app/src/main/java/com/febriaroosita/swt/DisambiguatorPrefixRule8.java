@@ -9,19 +9,15 @@ import java.util.regex.Pattern;
 public class DisambiguatorPrefixRule8 implements DisambiguatorInterface
 {
     /**
-     * Disambiguate Prefix Rule 8
-     * Rule 8 : terCP -> ter-CP where C != 'r' and P != 'er'
+     * 8 : terCP -> ter-CP where C != 'r' and P != 'er'
      */
     public String disambiguate(String word)
     {
         String match = "";
 
-        // Pattern to find code
-        String pattern = "^ter([bcdfghjklmnpqrstvwxyz])([a-z])(.*)$";  // Sequence of 8 digits'
-
+        String pattern = "^ter([bcdfghjklmnpqrstvwxyz])([a-z])(.*)$";
         Pattern regEx = Pattern.compile(pattern);
 
-        // Find instance of pattern matches
         Matcher m = regEx.matcher(word);
         if (m.find()) {
             String pattern2 = "^er(.*)$";

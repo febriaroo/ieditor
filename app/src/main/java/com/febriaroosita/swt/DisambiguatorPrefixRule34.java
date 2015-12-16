@@ -9,16 +9,13 @@ import java.util.regex.Pattern;
 public class DisambiguatorPrefixRule34 implements DisambiguatorInterface
 {
     /**
-     * Disambiguate Prefix Rule 34
-     * Rule 34 : peCP -> pe-CP where C != {r|w|y|l|m|n} and P != 'er'
+     *  34 : peCP -> pe-CP where C != {r|w|y|l|m|n} and P != 'er'
      */
     public String disambiguate(String word)
     {
         String match = "";
 
-        // Pattern to find code
-        String pattern = "^pe([bcdfghjklmnpqrstvwxyz])(.*)$";  // Sequence of 8 digits'
-
+        String pattern = "^pe([bcdfghjklmnpqrstvwxyz])(.*)$";
         Pattern regEx = Pattern.compile(pattern);
         Matcher m = regEx.matcher(word);
         if (m.find()) {

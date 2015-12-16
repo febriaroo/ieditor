@@ -9,16 +9,13 @@ import java.util.regex.Pattern;
 public class DisambiguatorPrefixRule31a  implements DisambiguatorInterface
 {
     /**
-     * Disambiguate Prefix Rule 31a
-     * CC Rule 31a : penyV -> pe-nyV
+     * 31a : penyV -> pe-nyV
      */
     public String disambiguate(String word)
     {
         String match = "";
 
-        // Pattern to find code
-        String pattern = "^peny([aiueo])(.*)$";  // Sequence of 8 digits'
-
+        String pattern = "^peny([aiueo])(.*)$";
         Pattern regEx = Pattern.compile(pattern);
         Matcher m = regEx.matcher(word);
         if (m.find()) {

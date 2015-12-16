@@ -8,20 +8,16 @@ import java.util.regex.Pattern;
 public class DisambiguatorPrefixRule3  implements DisambiguatorInterface
 {
     /**
-     * Disambiguate Prefix Rule 3
-     * Rule 3 : berCAerV -> ber-CAerV where C != 'r'
-     * return string|null
+     *  3 : berCAerV -> ber-CAerV where C != 'r'
      */
     public String disambiguate(String word)
     {
         String match = "";
 
-        // Pattern to find code
-        String pattern = "^ber([bcdfghjklmnpqrstvwxyz])([a-z])er([aiueo])(.*)$";  // Sequence of 8 digits'
+        String pattern = "^ber([bcdfghjklmnpqrstvwxyz])([a-z])er([aiueo])(.*)$";
 
         Pattern regEx = Pattern.compile(pattern);
 
-        // Find instance of pattern matches
         Matcher m = regEx.matcher(word);
         if (m.find()) {
             if(m.group(1)!="r")

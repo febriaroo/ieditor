@@ -8,18 +8,14 @@ import java.util.regex.Pattern;
 public class DisambiguatorPrefixRule10 implements DisambiguatorInterface
 {
     /**
-     * Disambiguate Prefix Rule 10
-     * Rule 10 : me{l|r|w|y}V -> me-{l|r|w|y}V
+     *  10 : me{l|r|w|y}V -> me-{l|r|w|y}V
      */
     public String disambiguate(String word)
     {String match = "";
 
-        // Pattern to find code
-        String pattern = "^me([lrwy])([aiueo])(.*)$";  // Sequence of 8 digits'
-
+        String pattern = "^me([lrwy])([aiueo])(.*)$";
         Pattern regEx = Pattern.compile(pattern);
 
-        // Find instance of pattern matches
         Matcher m = regEx.matcher(word);
         if (m.find()) {
             if(m.group(1)!="r")

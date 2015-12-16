@@ -2,6 +2,7 @@ package com.febriaroosita.swt;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.text.SpannableString;
@@ -9,8 +10,18 @@ import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.widget.EditText;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.RAMDirectory;
+
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,26 +34,34 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
     String allText;
 
     DbKata kata;
+
     String par;
     ArrayList<CKata> myKata;
     private EditText ma;
     String filePath;
-    int firstchar, lastchar;
-    ArrayList<removalClass> myremoval;
+    Context pass;
 
+    Directory directory;
+    IndexWriter indexWriter;
+    Analyzer analyzer;
 
     // public CBudayaAdapter budayaAdapter;
-
     DbHistory his;
 
     // public CBudayaAdapter budayaAdapter;
 
     public SQLiteDatabase db;
     public SQLiteDatabase db1;
+    public SQLiteDatabase dbtemp1;
     public DbKata DBKata;
+    public DBtemp dbtemp;;
+
+    int firstchar, lastchar;
+    ArrayList<removalClass> myremoval;
     public SpellingWords(Activity pass, int first, int last) {
         ActiveActivity=pass;
         DBKata = new DbKata(pass);
+        kata = new DbKata(pass);
         his=new DbHistory(pass);
         db = DBKata.getWritableDatabase();
         db1 = his.getWritableDatabase();
@@ -50,49 +69,208 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
         lastchar = last;
         myremoval = new ArrayList<removalClass>();
     }
+    public SpellingWords (Activity pass)
+    {
+        ActiveActivity=pass;
+        DBKata = new DbKata(pass);
+        dbtemp = new DBtemp(pass);
+        his=new DbHistory(pass);
+        db = DBKata.getWritableDatabase();
 
-    public int distanceKata(String kata1, String kata2) {
+        dbtemp1 = dbtemp.getWritableDatabase();
+        db1 = his.getWritableDatabase();
+        dbtemp.createtable(dbtemp1);
+    }
+
+    public int distanceKata(String kata1, String kata2){
         int m = kata1.length();
         int n = kata2.length();
 
         int lenMax = m;
         int lenMin = m;
-        if (n < lenMin) {
+        if(n < lenMin){
             lenMin = n;
         }
-        if (n > lenMax) {
+        if(n > lenMax){
             lenMax = n;
         }
-        int distance = lenMax - lenMin;
+        int distance = lenMax-lenMin;
         int i;
-        for (i = 0; i < lenMin; i++) {
-            if (kata1.toLowerCase().charAt(i) != kata2.toLowerCase().charAt(i)) {
+        for(i=0; i<lenMin; i++){
+            if(kata1.toLowerCase().charAt(i) != kata2.toLowerCase().charAt(i)){
                 distance++;
             }
         }
         return distance;
+
+
+
     }
-
-
-    public String getKataSub(int pos, int end) {
+    public String getKataSub(int pos, int end)
+    {
         String par = allText;
         //Log.e("tess","start: "+String.valueOf(pos)+" | end : "+String.valueOf(end));
         String cekKata = par.substring(pos, end);
 
         return cekKata;
     }
+    public boolean checkKataFromDB(String kataku)
+    {
 
-    public boolean checkKataFromDB(String kataku) {
+        boolean kataAda = kata.getDataByKata(db, kataku);
 
-        //boolean kataAda = kata.getDataByKata(db, kataku);
-        // return kataAda;
-        return kata.getDataByKata(db, kataku);
+        return kataAda;
+    }
+    public boolean checkAkhiran(String dasar) {
+        int awal = 0;
+        int akhir1 = 3;//untuk yang jumlahnya 2 huruf
+        int akhir2 = 2;//untuk yang jumlahnya 3 huruf
+        String dasar1;
+        int akhiran1;
+        int len = dasar.length();
+
+
+        String cekKataku, cekKataku2;
+        String cekAkhiran1=null, cekAkhiran2=null, cekAkhiran3 = null;
+        boolean status = false;
+        if (len > 1) {
+
+            //ambil awalan kata
+            if (len > 3) {
+                cekKataku = dasar.substring(awal, akhir1).toLowerCase();
+                cekKataku2 = dasar.substring(awal, akhir2).toLowerCase();
+                //ambil akhiran kata
+                cekAkhiran1 = dasar.substring(len - 1, len).toLowerCase();
+                cekAkhiran2 = dasar.substring(len - 2, len).toLowerCase();
+                cekAkhiran3 = dasar.substring(len - 3, len).toLowerCase();
+            } else {
+                cekKataku = dasar.toLowerCase();
+                cekKataku2 = dasar.toLowerCase();
+                cekAkhiran1 = dasar.substring(len - 1, len).toLowerCase();
+                cekAkhiran2 = dasar.substring(len - 2, len).toLowerCase();
+
+            }
+        }
+        //cek akhiran particles
+        //inni yang lama, oo trus passing ke fungsi barumu dimana ya?
+        if (cekAkhiran3.equals("kah")||cekAkhiran3.equals("lah")||cekAkhiran3.equals("pun")) {
+            dasar1 = dasar;
+            dasar1 = dasar1.substring(awal, len - 3);
+
+            if (cekKata(dasar1)) {
+                //kata ada di database
+                //Log.i("kata berakhiran i", "ada di db " + dasar);
+                status = true;
+                return status;
+            } else {
+                //cek akhiran
+                status = stemming(dasar1);
+                //-kan, -an, -i, -lah, dan -nya
+                //Log.i("kata berakhiran i", "coba cek di akhiran "+ dasar);
+            }
+        }
+        //cek akhiran inflectional possesive pronouns
+
+        if (cekAkhiran2.equals("ku")||cekAkhiran2.equals("mu")||cekAkhiran3.equals("nya")) {
+            dasar1 = dasar;
+            if(cekAkhiran3.equals("nya"))
+            {
+                dasar1 = dasar1.substring(awal, len - 3);
+            }
+            else
+            {
+                dasar1 = dasar1.substring(awal, len - 2);
+            }
+
+            if (cekKata(dasar1)) {
+                //kata ada di database
+                //Log.i("kata berakhiran i", "ada di db " + dasar);
+                status = true;
+                return status;
+            } else {
+                //cek akhiran
+                status = stemming(dasar1);
+                //-kan, -an, -i, -lah, dan -nya
+                //Log.i("kata berakhiran i", "coba cek di akhiran "+ dasar);
+            }
+        }
+
+
+
+        //dari sini
+        if (cekAkhiran1.equals("i")) {
+            dasar1 = dasar;
+            dasar1 = dasar1.substring(awal, len - 1);
+
+            if (cekKata(dasar1)) {
+                //kata ada di database
+                //Log.i("kata berakhiran i", "ada di db " + dasar);
+                status = true;
+                return status;
+            } else {
+                //cek akhiran
+                status = stemming(dasar1);
+                //-kan, -an, -i, -lah, dan -nya
+                //Log.i("kata berakhiran i", "coba cek di akhiran "+ dasar);
+
+
+            }
+
+        }
+        if (status == false && len > 2 && (cekAkhiran2.equals("an") || cekAkhiran2.equals("mu") || cekAkhiran2.equals("ku"))) {
+            dasar1 = dasar;
+            dasar1 = dasar1.substring(awal, len - 2);
+
+            if (cekKata(dasar1)) {
+                //kata ada di database
+                //Log.i("kata berakhiran an", "ada di db " + dasar);
+                status = true;
+                return status;
+            } else {
+                status = stemming(dasar1);
+                //cek akhiran
+                // stemming(dasar);
+                //-kan, -an, -i, -lah, dan -nya
+                //Log.i("kata berakhiran an", "coba cek di akhiran "+ dasar);
+
+
+            }
+
+        }
+        // -man, -wan, -wati
+        if (status == false && len > 3 && (cekAkhiran3.equals("kan") || cekAkhiran3.equals("lah") || cekAkhiran3.equals("nya") || cekAkhiran3.equals("wati") || cekAkhiran3.equals("wan") || cekAkhiran3.equals("man") || cekAkhiran3.equals("kah"))) {
+            dasar1 = dasar;
+            dasar1 = dasar1.substring(awal, len - 3);
+
+            if (cekKata(dasar1)) {
+                //kata ada di database
+                //Log.i("kata berakhiran kan", "ada di db "+ dasar);
+                status = true;
+                return status;
+            } else {
+                //cek akhiran
+                status = stemming(dasar1);
+                //-kan, -an, -i, -lah, dan -nya
+                //Log.i("kata berakhiran kan", "coba cek di akhiran "+ dasar);
+            }
+
+        }
+
+
+        return status;
+
+    }
+    public void cekfirst(String kataku)
+    {
+
+
+
     }
 
-    public boolean cekKataPos(int pos, int end) {
+    public boolean cekKataPos(int pos, int end){
         String par = allText;
         //   Log.e("tess","start: "+String.valueOf(pos)+" | end : "+String.valueOf(end));
-        String cekKata = par.substring(pos, end);
+        String cekKata = par.substring(pos,end);
 
 
         boolean kataAda = kata.getDataByKata(db, cekKata);
@@ -118,6 +296,596 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
         return kataAda;
 
     }
+    public boolean cekKata(String kataku){
+//        String par = ma.getText().toString();
+//        Log.e("tess","start: "+String.valueOf(pos)+" | end : "+String.valueOf(end));
+//        String cekKata = par.substring(pos,end);
+          boolean kataAda;
+        try {
+             kataAda = kata.getDataByKata(db, kataku);
+
+            //Log.e("tess",kataku);
+            //int i;
+            //int minDistance = 99999999;
+        /*for(i=0; i<myKata.size(); i++){
+            int distance = distanceKata(cekKata,myKata.get(i).kata);
+            if(myKata.get(i).kata.equals("saya"))
+            {
+                Log.e("tess","ada kata saya");
+            }
+            if(distance < minDistance){
+                minDistance = distance;
+            }
+                             if(minDistance <= 0){
+                kataSalah = false;
+                break;
+            }
+        }*/
+        }catch (NullPointerException e)
+        {
+            kataAda = false;
+        }
+
+        return kataAda;
+
+    }
+    public void kelima(String kataku,String prefix)
+    {
+        boolean status=false;
+        int len=kataku.length();
+        String cekAkhiran = kataku.substring(len - 1, len).toLowerCase();
+        String cekAkhiran2 = kataku.substring(len - 2, len).toLowerCase();
+        String cekAkhiran3 = kataku.substring(len - 3, len).toLowerCase();
+        if(cekAkhiran3.equals("kan"))
+        {
+            if(!prefix.equals("ke") || !prefix.equals("peng"))
+            {
+                status=true;
+            }
+
+        }
+        if(cekAkhiran2.equals("an"))
+        {
+
+            if(!prefix.equals("meng") || !prefix.equals("di")|| !prefix.equals("ter"))
+            {
+                status=true;
+            }
+        }
+        if(cekAkhiran.equals("i"))
+        {
+            if(!prefix.equals("ber") || !prefix.equals("ke")|| !prefix.equals("peng"))
+            {
+                status=true;
+            }
+        }
+    }
+    public void cekParticle(String kataku)
+    {
+        boolean status=false;
+        String cekKataku, cekKataku2,cekKataku3 = null;
+        String cekAkhiran1=null,cekAkhiran2 = null,cekAkhiran3 = null;
+        int awal=0;
+        String prefix="";
+        int akhir1=3;//untuk yang jumlahnya 2 huruf
+        int akhir3=4;//untuk yang jumlahnya 4 huruf
+        int akhir2=2;//untuk yang jumlahnya 3 huruf
+        String dasar,dasar1;
+        int akhiran1;
+        int len=kataku.length();
+        if(len>1) {
+            dasar = kataku;
+            //ambil awalan kata
+            if (len > 3) {
+                cekKataku = kataku.substring(awal, akhir1).toLowerCase();
+                cekKataku3 = kataku.substring(awal, akhir3).toLowerCase();
+                cekKataku2 = kataku.substring(awal, akhir2).toLowerCase();
+                //ambil akhiran kata
+                cekAkhiran3 = kataku.substring(len - 3, len).toLowerCase();
+            }
+            else
+            {
+                cekKataku=kataku.toLowerCase();
+                cekKataku2=kataku.toLowerCase();
+                cekAkhiran1 = kataku.substring(len - 1, len).toLowerCase();
+                cekAkhiran2 = kataku.substring(len - 2, len).toLowerCase();
+
+            }
+            if(cekKataku2.equals("me"))
+            {
+                prefix="me";
+                dasar = kataku.substring(akhir2, len);
+                if (cekKata(dasar)) {
+                    status = true;
+                }
+            }
+            if(cekKataku3.equals("meng"))
+            {
+                prefix="meng";
+                dasar = kataku.substring(akhir3, len);
+
+                if (cekKata(dasar)) {
+                    status = true;
+                }
+
+            }
+
+            else if(cekKataku3.equals("meny"))
+            {
+                prefix="meny";
+                dasar = kataku.substring(akhir3, len);
+                if (cekKata(dasar)) {
+                    status = true;
+                }
+            }
+            else if(cekKataku3.equals("meny"))
+            {
+                prefix="meny";
+                dasar = kataku.substring(akhir3, len);
+                if (cekKata(dasar)) {
+                    status = true;
+                }
+                else
+                {
+                    //kataserapan
+                    String temp = "s".concat(dasar);
+                    if (cekKata(temp)) {
+                        //kalau ada di db
+                        if(kata.getType(db,temp)=="v")
+                        {
+                            status = true;
+                        }
+                    }
+
+                }
+            }
+            else if(cekKataku.equals("men"))
+            {
+                prefix="men";
+                dasar = kataku.substring(akhir1, len);
+                if (cekKata(dasar)) {
+                    status = true;
+                }
+                else
+                {//kataserapan
+                    String temp = "t".concat(dasar);
+                    if (cekKata(temp)) {
+                        if(kata.getType(db,temp)=="n" ||kata.getType(db,temp)=="v" )
+                        {
+                            status = true;
+                        }
+                    }}
+            }
+            else if(cekKataku.equals("mem"))
+            {
+                prefix="mem";
+                dasar = kataku.substring(akhir1, len);
+                if (cekKata(dasar)) {
+                    status = true;
+                }
+                else
+                {
+                    //kataserapan
+                    String temp = "p".concat(dasar);
+                    if (cekKata(temp)) {
+                        if(kata.getType(db,temp)=="v")
+                        {
+                            status = true;
+                        }
+                    }
+
+                }
+            }
+
+            else if(cekKataku3.equals("peng"))
+            {
+                prefix="peng";
+                dasar = kataku.substring(akhir3, len);
+                if (cekKata(dasar)) {
+                    status = true;
+                }
+
+
+
+            }
+            else if(cekKataku.equals("peny"))
+            {
+                prefix="peny";
+                dasar = kataku.substring(akhir3, len);
+                if (cekKata(dasar)) {
+                    status = true;
+                }
+                else
+                {
+                    //kataserapan
+                    String temp = "s".concat(dasar);
+                    if (cekKata(temp)) {
+                        //kalau ada di db
+                        if(kata.getType(db,temp)=="v")
+                        {
+                            status = true;
+                        }
+                    }
+
+                }
+            }
+            else if(cekKataku.equals("pen"))
+            {
+                prefix="pen";
+                dasar = kataku.substring(akhir1, len);
+                if (cekKata(dasar)) {
+                    status = true;
+                }
+            }
+            else if(cekKataku.equals("pem"))
+            {
+                prefix="pem";
+                dasar = kataku.substring(akhir3, len);
+                if (cekKata(dasar)) {
+                    status = true;
+                }
+                else
+                {
+                    //kataserapan
+                    String temp = "p".concat(dasar);
+                    if (cekKata(temp)) {
+                        //kalau ada di db
+                        if(kata.getType(db,temp)=="v")
+                        {
+                            status = true;
+                        }
+                    }
+
+                }
+            }
+
+            else if(cekKataku2.equals("di"))
+            {
+                prefix="di";
+                dasar = kataku.substring(akhir2, len);
+                if (cekKata(dasar)) {
+                    status = true;
+                }
+            }
+
+            else if(cekKataku.equals("ter"))
+            {
+                prefix="ter";
+                dasar = kataku.substring(akhir1, len);
+                if (cekKata(dasar)) {
+                    status = true;
+                }
+            }
+
+            else if(cekKataku2.equals("ke"))
+            {
+                prefix="ke";
+                dasar = kataku.substring(akhir2, len);
+                if (cekKata(dasar)) {
+                    status = true;
+                }
+                else if(cekAkhiran3.equals("kan"))
+                {
+                    status=true;
+                }
+            }
+
+            else if(cekKataku.equals("ber"))
+            {
+                prefix="ber";
+                dasar = kataku.substring(akhir1, len);
+                if (cekKata(dasar)) {
+                    status = true;
+                }
+            }
+
+            else if(cekKataku.equals("bel"))
+            {
+                prefix="bel";
+                dasar = kataku.substring(akhir1, len);
+                if (dasar.equals("ajar")) {
+                    status = true;
+                }
+            }
+            else if(cekKataku2.equals("be"))
+            {
+                prefix="be";
+                dasar = kataku.substring(akhir2, len);
+                if (cekKata(dasar)) {
+                    status = true;
+                }
+            }
+            else if(cekKataku.equals("per"))
+            {
+                prefix="per";
+                dasar = kataku.substring(akhir1, len);
+                if (cekKata(dasar)) {
+                    status = true;
+                }
+            }
+            else if(cekKataku.equals("pel"))
+            {
+                prefix="pel";
+                dasar = kataku.substring(akhir1, len);
+                if (dasar.equals("ajar")) {
+                    status = true;
+                }
+            }
+            else if(cekKataku2.equals("pe"))
+            {
+                prefix="pe";
+                dasar = kataku.substring(akhir2, len);
+                if (cekKata(dasar)) {
+                    status = true;
+                }
+            }
+            if(cekAkhiran3.equals("kan"))
+            {
+
+                if(!prefix.equals("ke") || !prefix.equals("peng"))
+                {
+                    status=true;
+                }
+
+            }
+            if(cekAkhiran2.equals("an"))
+            {
+
+                if(!prefix.equals("meng") || !prefix.equals("di")|| !prefix.equals("ter"))
+                {
+                    status=true;
+                }
+            }
+            if(cekAkhiran1.equals("i"))
+            {
+                if(!prefix.equals("ber") || !prefix.equals("ke")|| !prefix.equals("peng"))
+                {
+                    status=true;
+                }
+            }
+
+        }
+    }
+    //inflectional possesive pronouns
+    public void kepunyaan(String kataku)
+    {
+        boolean status=false;
+        String cekKataku, cekKataku2;
+        String cekAkhiran1,cekAkhiran2,cekAkhiran3 = null;
+        //String par = ma.getText().toString();
+        int awal=0;
+        int akhir1=3;//untuk yang jumlahnya 2 huruf
+        int akhir2=2;//untuk yang jumlahnya 3 huruf
+        String dasar,dasar1;
+        int akhiran1;
+        int len=kataku.length();
+        if(len>1) {
+            dasar = kataku;
+            //ambil awalan kata
+            if (len > 3) {
+                cekKataku = kataku.substring(awal, akhir1).toLowerCase();
+                cekKataku2 = kataku.substring(awal, akhir2).toLowerCase();
+                //ambil akhiran kata
+                cekAkhiran1 = kataku.substring(len - 1, len).toLowerCase();
+                cekAkhiran2 = kataku.substring(len - 2, len).toLowerCase();
+                cekAkhiran3 = kataku.substring(len - 3, len).toLowerCase();
+            } else {
+                cekKataku = kataku.toLowerCase();
+                cekKataku2 = kataku.toLowerCase();
+                cekAkhiran1 = kataku.substring(len - 1, len).toLowerCase();
+                cekAkhiran2 = kataku.substring(len - 2, len).toLowerCase();
+
+            }
+        }
+    }
+    public boolean cekKataHistori(String kataku)
+    {
+        if(his.getDataByKata(db1, kataku))
+        {
+            if(his.getJumKata(db1,kataku)>5)
+            {
+                his.updateDatacount(db1,kataku,his.getJumKata(db1,kataku)+1);
+                return true;
+            }
+            his.updateDatacount(db1,kataku,his.getJumKata(db1,kataku)+1);
+
+        }
+        return false;
+    }
+    public boolean cekKataHistoriBaru(String kataku)
+    {
+        if(his.getJumKata(db1, kataku.toLowerCase())>0)
+        {
+            return true;
+
+        }
+        return false;
+    }
+    public boolean cekSalahKata(String kataku)
+    {
+        try {
+        if(dbtemp.getJumKata(dbtemp1, kataku.toLowerCase())>0) {
+            return true;
+        }
+        } catch (NullPointerException e)
+        {
+            return false;
+        }
+    return false;
+    }
+    public void addKataHistory(String kataku)
+    {
+        CHistory ne=new CHistory();
+        ne.id_kata=his.getJumDB(db)+1;
+        ne.jumlah_digunakan=his.getJumKata(db1, kataku);
+        ne.kata=kataku;
+        Date a =new Date();
+        ne.tanggal = a.toString();
+        ne.weight = 0.0;
+
+        directory = new RAMDirectory();
+
+        analyzer= new StandardAnalyzer();
+        indexWriter = null;
+        //directory = new FSDirectory().openInput("");
+
+
+        if(his.getJumKata(db1,kataku)==0)
+        {
+            ne.jumlah_digunakan = 1;
+            his.insertData(db1, ne);
+
+            try {
+                indexWriter = new IndexWriter(directory, analyzer,
+                        true);
+
+                Document doc = new Document();
+                doc.add(new Field("fieldname", kataku, Field.Store.YES,
+                        Field.Index.TOKENIZED));
+                indexWriter.addDocument(doc);
+
+                indexWriter.optimize();
+                indexWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+    public void addKataTemp(String kataku)
+    {
+        CHistory ne=new CHistory();
+        ne.id_kata=dbtemp.getJumDB(dbtemp1)+1;
+        ne.jumlah_digunakan=dbtemp.getJumKata(dbtemp1, kataku);
+        ne.kata=kataku;
+        Date a =new Date();
+        ne.tanggal = a.toString();
+        ne.weight = 0.0;
+        if(dbtemp.getJumKata(dbtemp1,kataku)==0)
+        {
+            ne.jumlah_digunakan = 1;
+            dbtemp.insertData(dbtemp1, ne);
+
+        }
+
+    }
+
+
+    public boolean stemming(String kataku) //
+    {
+        boolean status=false;
+        int awal = 0;
+        int akhir1 = 3;//untuk yang jumlahnya 2 huruf
+        int akhir2 = 2;//untuk yang jumlahnya 3 huruf
+        String dasar1;
+        int akhiran1;
+        // ^[a-zA-Z]+$
+        stemming a = new stemming(ActiveActivity);
+        long startTime = System.nanoTime();
+
+        try{
+            //check angka
+            Double bee = Double.parseDouble(kataku);
+            status = true;
+        }
+        catch (NumberFormatException nfe) {
+            if(kataku.equals(""))
+            {
+                status =true;
+            }
+            String temp = kataku.replaceAll("[^A-Za-z0-9]","").toLowerCase();
+            if(cekKataHistoriBaru(temp))
+            {
+                status=true;
+            }
+            else if(cekSalahKata(temp))
+            {
+                status = false;
+            }
+            else if(cekKata(a.stem(temp)) )
+            {
+                status = true;
+
+            }
+            //nyalakan ini kalo mau ke semula
+            //kataku = kataku.replaceAll("[^\\p{L}\\p{Z}]", "");
+            //int len = kataku.length();
+            //status = startStemming(kataku);
+
+        }
+        long endTime = System.nanoTime();
+
+        long duration = (endTime - startTime)/1000000;
+        if(duration>10)
+        {
+            Log.i("duration-text", kataku);
+        }
+        Log.i("duration", Long.toString(duration));
+        return status;
+    }
+
+
+    public int getPositionFromSeparator(int firstChar)
+    {
+        //postBefore buat bandingin sama yang sebelomnya
+        int posBefore=-1;
+        //ascii 32-47
+        //58-64
+        //91-96
+        //123-126
+        //posEnter != -1 && (posEnter < pos || pos == -1)
+        for(int i=32;i<=47;i++)
+        {
+            int pos = par.indexOf((char)i,firstChar);
+            if(pos != -1 && (pos < posBefore|| posBefore== -1))
+            {
+                posBefore=pos;
+            }
+        }
+        for(int i=58;i<=64;i++)
+        {
+            int pos = par.indexOf((char)i,firstChar);
+            if(pos != -1 && (posBefore > pos || posBefore == -1))
+            {
+                posBefore=pos;
+            }
+        }
+        for(int i=91;i<=96;i++)
+        {
+            int pos = par.indexOf((char)i,firstChar);
+            if(pos != -1 && (posBefore > pos || posBefore == -1))
+            {
+                posBefore=pos;
+            }
+        }
+        for(int i=123;i<=126;i++)
+        {
+            int pos = par.indexOf((char)i,firstChar);
+            if(pos != -1 && (posBefore > pos || posBefore == -1))
+            {
+                posBefore=pos;
+            }
+        }
+        int pos = par.indexOf("\t",firstChar);
+        if(pos != -1 && (posBefore > pos || posBefore == -1))
+        {
+            posBefore=pos;
+        }
+        pos = par.indexOf("\r",firstChar);
+        if(pos != -1 && (posBefore > pos || posBefore == -1))
+        {
+            posBefore=pos;
+        }
+        pos = par.indexOf("\n",firstChar);
+        if(pos != -1 && (posBefore > pos || posBefore == -1))
+        {
+            posBefore=pos;
+        }
+        return posBefore;
+    }
+
     private String findMatch1a(String myString) {
 
         String match = "";
@@ -1083,7 +1851,7 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
 
         // Pattern to find code
         String pattern = "(lah|kah|tah|pun)$";  // Sequence of 8 digits'
-        match = kata.replaceAll(pattern,"");
+        match = kata.replaceAll(pattern, "");
         /*Pattern regEx = Pattern.compile(pattern);
         Matcher m = regEx.matcher(kata);
         if (m.find()) {
@@ -1137,6 +1905,8 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
         return match;
 
     }
+
+
     private String checkPrural(String myString) {
 
         String match = "";
@@ -1178,29 +1948,6 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
                 Matcher m1 = regEx.matcher(myString);
                 if(!m1.group(1).isEmpty() || !m1.group(2).isEmpty())
                 {
-/*
-* // malaikat-malaikat-nya -> malaikat malaikat-nya
-        $suffix = $words[2];
-        if (in_array($suffix, array('ku', 'mu', 'nya', 'lah', 'kah', 'tah', 'pun')) &&
-            preg_match('/^(.*)-(.*)$/', $words[1], $words)) {
-            $words[2] .= '-' . $suffix;
-        }
-
-        // berbalas-balasan -> balas
-        $rootWord1 = $this->stemSingularWord($words[1]);
-        $rootWord2 = $this->stemSingularWord($words[2]);
-
-        // meniru-nirukan -> tiru
-        if (!$this->dictionary->contains($words[2]) && $rootWord2 === $words[2]) {
-            $rootWord2 = $this->stemSingularWord('me' . $words[2]);
-        }
-
-        if ($rootWord1 == $rootWord2) {
-            return $rootWord1;
-        } else {
-            return $plural;
-        }
-* */
 
                 }
                 return m.group(1);
@@ -1479,6 +2226,19 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
         return match;
     }
 
+    public boolean lala(String kata,String pattern)
+    {
+        String match = "";
+
+        Pattern regEx = Pattern.compile(pattern);
+        Matcher m = regEx.matcher(kata);
+        if (m.find()) {
+            return true;
+
+        }
+        return false;
+
+    }
     public String checkValidImbuhan(String kata)
     {
         String pattern2[] = {"^be(.*)lah$",
@@ -1625,255 +2385,6 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
 
 
     }
-    public boolean cekKata(String kataku) {
-//        String par = ma.getText().toString();
-//        Log.e("tess","start: "+String.valueOf(pos)+" | end : "+String.valueOf(end));
-//        String cekKata = par.substring(pos,end);
-
-
-        boolean kataAda = DBKata.getDataByKata(db, kataku);
-
-        //Log.e("tess",kataku);
-        //int i;
-        //int minDistance = 99999999;
-        /*for(i=0; i<myKata.size(); i++){
-            int distance = distanceKata(cekKata,myKata.get(i).kata);
-            if(myKata.get(i).kata.equals("saya"))
-            {
-                Log.e("tess","ada kata saya");
-            }
-            if(distance < minDistance){
-                minDistance = distance;
-            }
-            if(minDistance <= 0){
-                kataSalah = false;
-                break;
-            }
-        }*/
-
-        return kataAda;
-
-    }
-
-    public boolean checkAkhiran(String dasar) {
-        int awal = 0;
-        int akhir1 = 3;//untuk yang jumlahnya 2 huruf
-        int akhir2 = 2;//untuk yang jumlahnya 3 huruf
-        String dasar1;
-        int akhiran1;
-        int len = dasar.length();
-
-
-        String cekKataku, cekKataku2;
-        String cekAkhiran1=null, cekAkhiran2=null, cekAkhiran3 = null;
-        boolean status = false;
-        if (len > 1) {
-
-            //ambil awalan kata
-            if (len > 3) {
-                cekKataku = dasar.substring(awal, akhir1).toLowerCase();
-                cekKataku2 = dasar.substring(awal, akhir2).toLowerCase();
-                //ambil akhiran kata
-                cekAkhiran1 = dasar.substring(len - 1, len).toLowerCase();
-                cekAkhiran2 = dasar.substring(len - 2, len).toLowerCase();
-                cekAkhiran3 = dasar.substring(len - 3, len).toLowerCase();
-            } else {
-                cekKataku = dasar.toLowerCase();
-                cekKataku2 = dasar.toLowerCase();
-                cekAkhiran1 = dasar.substring(len - 1, len).toLowerCase();
-                cekAkhiran2 = dasar.substring(len - 2, len).toLowerCase();
-
-            }
-        }
-            if (cekAkhiran1.equals("i")) {
-                dasar1 = dasar;
-                dasar1 = dasar1.substring(awal, len - 1);
-
-                if (cekKata(dasar1)) {
-                    //kata ada di database
-                    //Log.i("kata berakhiran i", "ada di db " + dasar);
-                    status = true;
-                    return status;
-                } else {
-                    //cek akhiran
-                    status = stemming(dasar1);
-                    //-kan, -an, -i, -lah, dan -nya
-                    //Log.i("kata berakhiran i", "coba cek di akhiran "+ dasar);
-
-
-                }
-
-            }
-            if (status == false && len > 2 && (cekAkhiran2.equals("an") || cekAkhiran2.equals("mu") || cekAkhiran2.equals("ku"))) {
-                dasar1 = dasar;
-                dasar1 = dasar1.substring(awal, len - 2);
-
-                if (cekKata(dasar1)) {
-                    //kata ada di database
-                    //Log.i("kata berakhiran an", "ada di db " + dasar);
-                    status = true;
-                    return status;
-                } else {
-                    status = stemming(dasar1);
-                    //cek akhiran
-                    // stemming(dasar);
-                    //-kan, -an, -i, -lah, dan -nya
-                    //Log.i("kata berakhiran an", "coba cek di akhiran "+ dasar);
-
-
-                }
-
-            }
-            // -man, -wan, -wati
-            if (status == false && len > 3 && (cekAkhiran3.equals("kan") || cekAkhiran3.equals("lah") || cekAkhiran3.equals("nya") || cekAkhiran3.equals("wati") || cekAkhiran3.equals("wan") || cekAkhiran3.equals("man") || cekAkhiran3.equals("kah"))) {
-                dasar1 = dasar;
-                dasar1 = dasar1.substring(awal, len - 3);
-
-                if (cekKata(dasar1)) {
-                    //kata ada di database
-                    //Log.i("kata berakhiran kan", "ada di db "+ dasar);
-                    status = true;
-                    return status;
-                } else {
-                    //cek akhiran
-                    status = stemming(dasar1);
-                    //-kan, -an, -i, -lah, dan -nya
-                    //Log.i("kata berakhiran kan", "coba cek di akhiran "+ dasar);
-                }
-
-            }
-
-
-            return status;
-
-    }
-    public boolean cekKataHistori(String kataku)
-    {
-        if(his.getDataByKata(db1,kataku))
-        {
-            if(his.getJumKata(db1,kataku)>5)
-            {
-                his.updateDatacount(db1,kataku,his.getJumKata(db1,kataku)+1);
-
-                return true;
-            }
-            his.updateDatacount(db1,kataku,his.getJumKata(db1,kataku)+1);
-
-        }
-        return false;
-    }
-
-
-  public int getPositionFromSeparator(int firstChar)
-    {
-        //postBefore buat bandingin sama yang sebelomnya
-        int posBefore=-1;
-        //ascii 32-47
-        //58-64
-        //91-96
-        //123-126
-        //posEnter != -1 && (posEnter < pos || pos == -1)
-        for(int i=32;i<=47;i++)
-        {
-            int pos = par.indexOf((char)i,firstChar);
-            if(pos != -1 && (pos < posBefore|| posBefore== -1))
-            {
-                posBefore=pos;
-            }
-        }
-        for(int i=58;i<=64;i++)
-        {
-            int pos = par.indexOf((char)i,firstChar);
-            if(pos != -1 && (posBefore > pos || posBefore == -1))
-            {
-                posBefore=pos;
-            }
-        }
-        for(int i=91;i<=96;i++)
-        {
-            int pos = par.indexOf((char)i,firstChar);
-            if(pos != -1 && (posBefore > pos || posBefore == -1))
-            {
-                posBefore=pos;
-            }
-        }
-        for(int i=123;i<=126;i++)
-        {
-            int pos = par.indexOf((char)i,firstChar);
-            if(pos != -1 && (posBefore > pos || posBefore == -1))
-            {
-                posBefore=pos;
-            }
-        }
-        int pos = par.indexOf("\t",firstChar);
-        if(pos != -1 && (posBefore > pos || posBefore == -1))
-        {
-            posBefore=pos;
-        }
-        pos = par.indexOf("\r",firstChar);
-        if(pos != -1 && (posBefore > pos || posBefore == -1))
-        {
-            posBefore=pos;
-        }
-        pos = par.indexOf("\n",firstChar);
-        if(pos != -1 && (posBefore > pos || posBefore == -1))
-        {
-            posBefore=pos;
-        }
-        return posBefore;
-    }
-    public boolean lala(String kata,String pattern)
-    {
-        String match = "";
-
-        Pattern regEx = Pattern.compile(pattern);
-        Matcher m = regEx.matcher(kata);
-        if (m.find()) {
-            return true;
-
-        }
-        return false;
-
-    }
-//prosesnya yang ini, ada algo yang lama belum tak apus wkwkkw
-    public boolean stemming(String kataku)
-    {
-        boolean status=false;
-
-        int awal = 0;
-        int akhir1 = 3;//untuk yang jumlahnya 2 huruf
-        int akhir2 = 2;//untuk yang jumlahnya 3 huruf
-        String dasar1;
-        int akhiran1;
-        // ^[a-zA-Z]+$
-        stemming a = new stemming(ActiveActivity);
-        try{
-
-            //check angka
-            Double bee = Double.parseDouble(kataku);
-            status = true;
-        }
-        catch (NumberFormatException nfe) {
-            if(kataku.equals(""))
-            {
-                status =true;
-            }
-            String temp = kataku.replaceAll("[^A-Za-z0-9]","").toLowerCase();
-
-            if(cekKata(a.stem(temp)) )
-            {
-                status = true;
-
-            }
-            //nyalakan ini kalo mau ke semula
-            //kataku = kataku.replaceAll("[^\\p{L}\\p{Z}]", "");
-            //int len = kataku.length();
-            //status = startStemming(kataku);
-
-
-        }
-        return status;
-    }
 
 
 
@@ -1883,7 +2394,9 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
         //create progress dialog
         super.onPreExecute();
         pDialog = new ProgressDialog(ActiveActivity);
-        pDialog.setMessage("Mengambil Data dari Server...");
+        pDialog.setMessage("Sedang dipersiapkan...");
+        pDialog.setCancelable(false);
+        pDialog.setCanceledOnTouchOutside(false);
         pDialog.show();
 
     }
@@ -1907,10 +2420,31 @@ public class SpellingWords extends AsyncTask<String, Void, SpannableString> {
         boolean ketemu = true;
 
         myText = new SpannableString(allText);
+
         if(!cekKata(allText)) {
             if (!stemming(allText)) {
                 myText.setSpan(new UnderlineSpan(), firstChar, lastChar, 0);
+                if(!cekSalahKata(allText.toLowerCase()))
+                {
+                    addKataTemp(allText.toLowerCase());
+                }
+                else {
 
+                    dbtemp.updateDatacount(dbtemp1,allText.toLowerCase(),dbtemp.getJumKata(dbtemp1,allText.toLowerCase())+1);
+                }
+
+            }
+            else if(!cekKata(allText.toLowerCase()) && !cekKataHistoriBaru(allText.toLowerCase()) )
+            {
+                addKataHistory(allText.toLowerCase());
+            }
+            else if(!cekKata(allText.toLowerCase()) && cekKataHistoriBaru(allText.toLowerCase()))
+            {
+                his.updateDatacount(db1,allText.toLowerCase(),his.getJumKata(db1,allText.toLowerCase())+1);
+            }
+            else {
+
+                dbtemp.updateDatacount(dbtemp1,allText.toLowerCase(),dbtemp.getJumKata(dbtemp1,allText.toLowerCase())+1);
             }
         }
 

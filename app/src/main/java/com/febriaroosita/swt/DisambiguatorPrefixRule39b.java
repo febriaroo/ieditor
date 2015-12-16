@@ -9,16 +9,13 @@ import java.util.regex.Pattern;
 public class DisambiguatorPrefixRule39b implements DisambiguatorInterface
 {
     /**
-     * Disambiguate Prefix Rule 39b (CC infix rules)
      * Rule 39b : CemV -> CV
      */
     public String disambiguate(String word)
     {
         String match = "";
 
-        // Pattern to find code
-        String pattern = "^([bcdfghjklmnpqrstvwxyz])em([aiueo])(.*)$";  // Sequence of 8 digits'
-
+        String pattern = "^([bcdfghjklmnpqrstvwxyz])em([aiueo])(.*)$";
         Pattern regEx = Pattern.compile(pattern);
         Matcher m = regEx.matcher(word);
         if (m.find()) {

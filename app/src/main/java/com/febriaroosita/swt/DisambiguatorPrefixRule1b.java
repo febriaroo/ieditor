@@ -9,16 +9,14 @@ import java.util.regex.Pattern;
 public class DisambiguatorPrefixRule1b implements DisambiguatorInterface
 {
     /**
-     * Disambiguate Prefix Rule 1b
-     * Rule 1b : berV -> be-rV
-     * @return string
+     *  1b : berV -> be-rV
+     *
      */
     public String disambiguate(String word)
     {
         String match = "";
 
-        // Pattern to find code
-        String pattern = "^ber([aiueo].*)$";  // Sequence of 8 digits'
+        String pattern = "^ber([aiueo].*)$";
 
         Pattern regEx = Pattern.compile(pattern);
 

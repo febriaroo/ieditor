@@ -8,15 +8,12 @@ import java.util.regex.Pattern;
 public class DisambiguatorPrefixRule27 implements DisambiguatorInterface
 {
     /**
-     * Disambiguate Prefix Rule 27
-     * Rule 27 : pen{c|d|j|z} -> pen-{c|d|j|z}
+     *  27 : pen{c|d|j|z} -> pen-{c|d|j|z}
      */
     public String disambiguate(String word){
         String match = "";
 
-        // Pattern to find code
-        String pattern = "^pen([cdjz])(.*)$";  // Sequence of 8 digits'
-
+        String pattern = "^pen([cdjz])(.*)$";
         Pattern regEx = Pattern.compile(pattern);
         Matcher m = regEx.matcher(word);
         if (m.find()) {

@@ -18,6 +18,8 @@ public class InvalidAffixPairSpecification implements SpecificationInterface
                 "^me(.*)an$",
                 "^me(.*)an$",
                 "^ter(.*)an$",
+                "^peng(.*)kan$",
+                "^peng(.*)i$",
                 "^per(.*)an$"};
 
         boolean statusCheck = true;

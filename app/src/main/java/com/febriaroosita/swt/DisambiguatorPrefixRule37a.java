@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 public class DisambiguatorPrefixRule37a implements DisambiguatorInterface
 {
     /**
-     * Disambiguate Prefix Rule 37a (CC infix rules)
      * Rule 37a : CerV -> CerV
      */
     public String disambiguate(String word)
@@ -17,8 +16,7 @@ public class DisambiguatorPrefixRule37a implements DisambiguatorInterface
         String match = "";
 
         // Pattern to find code
-        String pattern = "^([bcdfghjklmnpqrstvwxyz])(er[aiueo])(.*)$";  // Sequence of 8 digits'
-
+        String pattern = "^([bcdfghjklmnpqrstvwxyz])(er[aiueo])(.*)$";
         Pattern regEx = Pattern.compile(pattern);
         Matcher m = regEx.matcher(word);
         if (m.find()) {

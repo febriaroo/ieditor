@@ -224,14 +224,14 @@ public class Landingpage extends ActionBarActivity{
         String uriku=uri.toString();
         final Intent ii = new Intent(this, MainActivity.class);
         if(uriku.contains("com.google.android.apps.docs.storage")) {
-            Toast.makeText(this, uri.toString(), Toast.LENGTH_LONG).show();
+            //Toast.makeText(this, uri.toString(), Toast.LENGTH_LONG).show();
             grantUriPermission(getPackageName(), uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
             ParcelFileDescriptor pfd =
                     this.getContentResolver().
                             openFileDescriptor(uri, "r");
             pfd.getFileDescriptor().toString();
             Log.i("pfd","lalala"+pfd.getFileDescriptor().toString());
-            Toast.makeText(this, pfd.toString(), Toast.LENGTH_LONG).show();
+            //Toast.makeText(this, pfd.toString(), Toast.LENGTH_LONG).show();
             FileInputStream fileOutputStream =
                     new FileInputStream(pfd.getFileDescriptor());
             InputStream inputStream =
@@ -267,9 +267,9 @@ public class Landingpage extends ActionBarActivity{
                             File dir11 = new File(sdCard.getAbsolutePath() + "/" + "ieditor");
                             File dir;
                             //cek apakah foldernya ada?
-                            if (!dir11.exists()) {
+                            if (dir11.exists()) {
                             } else {
-                                if (!dir11.mkdirs()) {
+                                if (dir11.mkdirs()) {
                                     //gagal
                                 } else {
                                 }
@@ -288,7 +288,7 @@ public class Landingpage extends ActionBarActivity{
                                     CFile myFile = new CFile();
                                     int jum = Fileku.getJumData(db) + 1;
                                     myFile.id_file = jum;
-                                    myFile.nama_file = aaaa.toString();
+                                    myFile.nama_file = aaaa.toString().replaceAll("%20"," ");
                                     myFile.pathku = "/storage/emulated/0/ieditor/" + aaaa;
                                     myFile.tanggal_create = s;
                                     myFile.tanggal_update = s;
@@ -308,47 +308,20 @@ public class Landingpage extends ActionBarActivity{
                 dialog.show();
             } catch (IOException e) {
                 e.printStackTrace();
-                Toast.makeText(this, "erornyas:" + e.getMessage(), Toast.LENGTH_LONG).show();
+                //Toast.makeText(this, "erornyas:" + e.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Tidak bisa membuka file. Apakah file anda .doc?", Toast.LENGTH_LONG).show();
             }
             inputStream.close();
         }else if(uriku.contains("com.ianhanniballake.localstorage.documents1/document/"))
         {
             Log.i("ianhanni",uriku);
             final String lengkap = FileUtils.getPath(this, uri);
-            uriku=uriku.replace("%2F","/");
-            final String[] lengkap1 = uriku.split("content://com.ianhanniballake.localstorage.documents1/document/");
-            String[] temp = uriku.split("content://com.ianhanniballake.localstorage.documents1/document//storage/emulated/0/");
-            ii.putExtra("FilePath", lengkap1[1]);
-            ii.putExtra("status", "open");
-            if (Fileku.cektabelexist(db))
-            {
-                if (!Fileku.getFileName(db, temp[1])) {
-                    DateFormat dateFormatter = new SimpleDateFormat("MMM dd hh.mm");
-                    dateFormatter.setLenient(false);
-                    Date today = new Date();
-                    String s = dateFormatter.format(today);
-                    CFile myFile = new CFile();
-                    int jum = Fileku.getJumData(db) + 1;
-                    myFile.id_file = jum;
-                    myFile.nama_file = temp[1].toString();
-                    myFile.pathku = lengkap1[1];
-                    myFile.tanggal_create = s;
-                    myFile.tanggal_update = s;
-                    Fileku.insertData(db, myFile);
-                    startActivity(ii);
-                    finish();
-                } else {
-                    startActivity(ii);
-                    finish();
-                }
-            }
-        }
-        else
-        { //untuk openfile
-            final String lengkap = FileUtils.getPath(this, uri);
-            String[] temp = lengkap.split("/storage/emulated/0/");
-            ii.putExtra("FilePath", lengkap);
-            ii.putExtra("status", "open");
+            if(lengkap.contains(".doc")) {
+                uriku = uriku.replace("%2F", "/");
+                final String[] lengkap1 = uriku.split("content://com.ianhanniballake.localstorage.documents1/document/");
+                String[] temp = uriku.split("content://com.ianhanniballake.localstorage.documents1/document//storage/emulated/0/");
+                ii.putExtra("FilePath", lengkap1[1]);
+                ii.putExtra("status", "open");
                 if (Fileku.cektabelexist(db)) {
                     if (!Fileku.getFileName(db, temp[1])) {
                         DateFormat dateFormatter = new SimpleDateFormat("MMM dd hh.mm");
@@ -358,7 +331,85 @@ public class Landingpage extends ActionBarActivity{
                         CFile myFile = new CFile();
                         int jum = Fileku.getJumData(db) + 1;
                         myFile.id_file = jum;
-                        myFile.nama_file = temp[1].toString();
+                        myFile.nama_file = temp[1].toString().replaceAll("%20", " ");
+                        myFile.pathku = lengkap1[1];
+                        myFile.tanggal_create = s;
+                        myFile.tanggal_update = s;
+                        Fileku.insertData(db, myFile);
+                        startActivity(ii);
+                        finish();
+                    } else {
+                        startActivity(ii);
+                        finish();
+                    }
+                }
+            }
+            else
+            {
+                Toast.makeText(this, "Bukan file .doc", Toast.LENGTH_LONG).show();
+            }
+        }
+        else if(uriku.contains("com.ianhanniballake.localstorage.documents/document/"))
+        {
+            Log.i("ianhanni",uriku);
+            final String lengkap = FileUtils.getPath(this, uri);
+
+                uriku = uriku.replace("%2F", "/");
+                final String[] lengkap1 = uriku.split("content://com.ianhanniballake.localstorage.documents/document/");
+                String[] temp = uriku.split("content://com.ianhanniballake.localstorage.documents/document//storage/emulated/0/");
+                if(lengkap1[lengkap1.length-1].contains(".doc")) {
+                ii.putExtra("FilePath", lengkap1[1]);
+                    ii.putExtra("status", "open");
+                if (Fileku.cektabelexist(db)) {
+                    if (!Fileku.getFileName(db, temp[1])) {
+                        DateFormat dateFormatter = new SimpleDateFormat("MMM dd hh.mm");
+                        dateFormatter.setLenient(false);
+                        Date today = new Date();
+                        String s = dateFormatter.format(today);
+                        CFile myFile = new CFile();
+                        int jum = Fileku.getJumData(db) + 1;
+                        myFile.id_file = jum;
+                        myFile.nama_file = temp[1].toString().replaceAll("%20", " ");
+                        myFile.pathku = lengkap1[1];
+                        myFile.tanggal_create = s;
+                        myFile.tanggal_update = s;
+                        Fileku.insertData(db, myFile);
+                        startActivity(ii);
+                        finish();
+                    } else {
+                        startActivity(ii);
+                        finish();
+                    }
+                }
+            }
+            else
+            {
+
+                Toast.makeText(this, "Bukan file .doc", Toast.LENGTH_LONG).show();
+            }
+        }
+        else { //untuk openfile
+            final String lengkap = FileUtils.getPath(this, uri);
+            if (lengkap.contains(".doc")) {
+                String[] temp = lengkap.split("/storage/emulated/0/");
+                if (lengkap.contains("/storage/emulated/0/")) {
+                    temp = lengkap.split("/storage/emulated/0/");
+                } else if (lengkap.contains(getFilesDir().toString())) {
+                    temp = lengkap.split(getFilesDir().toString());
+                }
+
+                ii.putExtra("FilePath", lengkap);
+                ii.putExtra("status", "open");
+                if (Fileku.cektabelexist(db)) {
+                    if (!Fileku.getFileName(db, temp[1])) {
+                        DateFormat dateFormatter = new SimpleDateFormat("MMM dd hh.mm");
+                        dateFormatter.setLenient(false);
+                        Date today = new Date();
+                        String s = dateFormatter.format(today);
+                        CFile myFile = new CFile();
+                        int jum = Fileku.getJumData(db) + 1;
+                        myFile.id_file = jum;
+                        myFile.nama_file = temp[1].toString().replaceAll("%20", " ");
                         myFile.pathku = lengkap;
                         myFile.tanggal_create = s;
                         myFile.tanggal_update = s;
@@ -373,6 +424,13 @@ public class Landingpage extends ActionBarActivity{
                 }
 
             }
+            else {
+
+                Toast.makeText(this, "Bukan file .doc", Toast.LENGTH_LONG).show();
+
+            }
+        }
+
 
     }
     @Override

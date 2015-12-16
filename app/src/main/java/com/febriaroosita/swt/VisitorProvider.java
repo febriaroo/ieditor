@@ -211,6 +211,13 @@ public class VisitorProvider {
 
         disambiguator.clear();
         disambiguator.add(new DisambiguatorPrefixRule38a());
+        disambiguator.add(new DisambiguatorPrefixRule38b());
+        this.prefixVisitors.add(new PrefixDisambiguator(
+                disambiguator
+        ));
+
+        disambiguator.clear();
+        disambiguator.add(new DisambiguatorPrefixRule39a());
         disambiguator.add(new DisambiguatorPrefixRule39b());
         this.prefixVisitors.add(new PrefixDisambiguator(
                 disambiguator
@@ -223,7 +230,6 @@ public class VisitorProvider {
                 disambiguator
         ));
 
-        // Sastrawi rules
         // ku-A, kau-A
         disambiguator.clear();
         disambiguator.add(new DisambiguatorPrefixRule41());
